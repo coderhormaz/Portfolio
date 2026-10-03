@@ -124,12 +124,12 @@ export default function Work() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                   <div className="relative flex h-full flex-col justify-between p-5 sm:p-6">
                     <div className="flex items-start justify-between gap-3">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] bg-black/35 backdrop-blur px-3 py-1.5 rounded-full border border-white/20 break-all">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white bg-black/35 backdrop-blur px-3 py-1.5 rounded-full border border-white/20 break-all">
                         {p.linkLabel}
                       </span>
                       <span className="font-display text-5xl sm:text-6xl font-bold leading-[0.85] text-white/25 shrink-0">0{i + 1}</span>
                     </div>
-                    <div>
+                    <div className="text-white">
                       <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/85">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live in production
                       </div>

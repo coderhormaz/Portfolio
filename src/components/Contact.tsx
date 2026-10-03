@@ -16,9 +16,10 @@ function ContactForm() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (name.trim().length < 2) {
       setError("Please tell me your name.");
@@ -33,10 +34,28 @@ function ContactForm() {
       return;
     }
     setError("");
-    const subject = encodeURIComponent(`Portfolio inquiry from ${name.trim()}`);
-    const body = encodeURIComponent(`${message.trim()}\n\n— ${name.trim()} (${email.trim()})`);
-    window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
-    setSent(true);
+    setSending(true);
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: "5b753ca7-d1f3-4e40-947f-455243a55493",
+          name: name.trim(),
+          email: email.trim(),
+          message: message.trim(),
+          subject: `Portfolio inquiry from ${name.trim()}`,
+          from_name: "Hormaz Portfolio",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || "Send failed");
+      setSent(true);
+    } catch {
+      setError("Couldn't send just now. Please try again or email me directly.");
+    } finally {
+      setSending(false);
+    }
   }
 
   function reset() {
@@ -53,9 +72,9 @@ function ContactForm() {
         <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-400/15">
           <Check className="h-6 w-6 text-emerald-300" />
         </span>
-        <p className="font-display mt-4 text-2xl font-bold">Message ready to send</p>
+        <p className="font-display mt-4 text-2xl font-bold">Message sent</p>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/60">
-          Your email app should have opened with everything pre-filled. Just hit send, I reply within 24 hours.
+          Thanks for reaching out. I read everything myself and reply within 24 hours.
         </p>
         <button
           onClick={reset}
@@ -131,14 +150,21 @@ function ContactForm() {
         )}
         <button
           type="submit"
-          className="group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-8 py-4 font-bold text-white transition hover:bg-[#ece8de] hover:text-black sm:w-auto"
+          disabled={sending}
+          className="group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-8 py-4 font-bold text-white transition hover:bg-[#ece8de] hover:text-black disabled:cursor-wait disabled:opacity-70 sm:w-auto"
         >
-          Send message
-          <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          {sending ? (
+            <>
+              Sending
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            </>
+          ) : (
+            <>
+              Send message
+              <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </>
+          )}
         </button>
-        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
-          No backend needed. Opens your mail app pre-filled.
-        </p>
       </form>
     </Reveal>
   );

@@ -127,7 +127,7 @@ export const clientProjects: Project[] = [
     image: "/aiskool.png",
   },
   {
-    title: "Tarannum Khan",
+    title: "Aureline",
     subtitle: "Dermatology & Skincare Platform",
     description:
       "Consultation booking, skincare eCommerce (cart, orders, stock alerts), revenue analytics dashboard, admin controls and doctor profile.",
