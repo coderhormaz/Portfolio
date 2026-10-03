@@ -21,10 +21,16 @@ export default function SmoothScroll() {
       const el = document.querySelector(id);
       if (el) {
         e.preventDefault();
-        lenis.scrollTo(el as HTMLElement, { offset: -80, duration: 1.5 });
+        // CSS scroll-margin-top already offsets anchors; keep Lenis in sync with it
+        lenis.scrollTo(el as HTMLElement, { offset: 0, duration: 1.5 });
       }
     };
     document.addEventListener("click", onClick);
+
+    const stop = () => lenis.stop();
+    const start = () => lenis.start();
+    window.addEventListener("lenis:stop", stop);
+    window.addEventListener("lenis:start", start);
 
     let raf = 0;
     const loop = (time: number) => {
@@ -35,6 +41,8 @@ export default function SmoothScroll() {
     return () => {
       cancelAnimationFrame(raf);
       document.removeEventListener("click", onClick);
+      window.removeEventListener("lenis:stop", stop);
+      window.removeEventListener("lenis:start", start);
       lenis.destroy();
     };
   }, []);

@@ -37,6 +37,21 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* lock background scroll while the mobile menu is open */
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(open ? "lenis:stop" : "lenis:start"));
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    const lock = open ? "hidden" : prevBody;
+    document.body.style.overflow = lock;
+    document.documentElement.style.overflow = open ? "hidden" : prevHtml;
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+      window.dispatchEvent(new CustomEvent("lenis:start"));
+    };
+  }, [open ]);
+
   return (
     <>
       <motion.header
