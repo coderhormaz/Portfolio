@@ -143,14 +143,14 @@ export default function Hero() {
                   I build <span className="font-serif-accent font-normal text-[#ff4d00]">production</span> web
                 </motion.span>
               </span>
-              <span className="block overflow-hidden pb-1">
+              <span className="block overflow-hidden pb-2">
                 <motion.span
                   initial={{ y: "110%" }}
                   animate={{ y: 0 }}
                   transition={{ duration: 0.9, delay: 0.18, ease: [...EASE] }}
-                  className="block text-white/45"
+                  className="block text-[#ece8de]"
                 >
-                  & Web3 products people <span className="font-serif-accent font-normal text-[#ece8de]">love.</span>
+                  & Web3 products people <span className="font-serif-accent font-normal text-[#ff4d00]">love.</span>
                 </motion.span>
               </span>
             </h1>

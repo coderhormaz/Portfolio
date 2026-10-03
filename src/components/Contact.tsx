@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { ArrowUp, ArrowUpRight, Copy, Check, Send, RotateCcw } from "lucide-react";
+import { ArrowUp, ArrowUpRight, Copy, Check, Send, RotateCcw, Clock, Briefcase, MapPin, Mail } from "lucide-react";
 import { profile } from "@/data/portfolio";
 import { Magnetic, Reveal } from "./ui";
 
@@ -68,7 +68,7 @@ function ContactForm() {
 
   if (sent) {
     return (
-      <div className="mx-auto mt-10 sm:mt-12 w-full max-w-2xl rounded-[1.75rem] border border-emerald-300/25 bg-emerald-400/[0.07] p-8 text-center sm:p-10">
+      <div className="flex h-full min-h-[320px] flex-col items-center justify-center p-8 text-center sm:p-10">
         <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-400/15">
           <Check className="h-6 w-6 text-emerald-300" />
         </span>
@@ -87,86 +87,77 @@ function ContactForm() {
   }
 
   return (
-    <Reveal delay={0.1} className="mx-auto mt-10 sm:mt-12 w-full max-w-2xl">
-      <form
-        onSubmit={onSubmit}
-        noValidate
-        className="rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5 sm:p-8 backdrop-blur"
-      >
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/40">
-          Or drop a message here
-        </p>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <div className="min-w-0">
-            <label htmlFor="cf-name" className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
-              Name *
-            </label>
-            <input
-              id="cf-name"
-              type="text"
-              autoComplete="name"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-          <div className="min-w-0">
-            <label htmlFor="cf-email" className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
-              Email *
-            </label>
-            <input
-              id="cf-email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="mb-1.5 flex items-baseline justify-between">
-            <label htmlFor="cf-msg" className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
-              Message *
-            </label>
-            <span className="font-mono text-[10px] text-white/30 tabular-nums">{message.length}/1000</span>
-          </div>
-          <textarea
-            id="cf-msg"
-            rows={5}
-            maxLength={1000}
-            placeholder="What are we building? Budget and timeline help."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className={`${inputCls} min-h-[140px] resize-y`}
+    <form onSubmit={onSubmit} noValidate className="p-5 sm:p-8">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="min-w-0">
+          <label htmlFor="cf-name" className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+            Name *
+          </label>
+          <input
+            id="cf-name"
+            type="text"
+            autoComplete="name"
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className={inputCls}
           />
         </div>
-        {error && (
-          <p role="alert" className="mt-3 rounded-xl border border-[#ff4d00]/40 bg-[#ff4d00]/10 px-4 py-3 text-sm text-[#ff8a4d]">
-            {error}
-          </p>
+        <div className="min-w-0">
+          <label htmlFor="cf-email" className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+            Email *
+          </label>
+          <input
+            id="cf-email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={inputCls}
+          />
+        </div>
+      </div>
+      <div className="mt-3">
+        <div className="mb-1.5 flex items-baseline justify-between">
+          <label htmlFor="cf-msg" className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+            Project details *
+          </label>
+          <span className="font-mono text-[10px] text-white/30 tabular-nums">{message.length}/1000</span>
+        </div>
+        <textarea
+          id="cf-msg"
+          rows={5}
+          maxLength={1000}
+          placeholder="What are we building? Budget and timeline help."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className={`${inputCls} min-h-[140px] resize-y`}
+        />
+      </div>
+      {error && (
+        <p role="alert" className="mt-3 rounded-xl border border-[#ff4d00]/40 bg-[#ff4d00]/10 px-4 py-3 text-sm text-[#ff8a4d]">
+          {error}
+        </p>
+      )}
+      <button
+        type="submit"
+        disabled={sending}
+        className="group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-8 py-4 font-bold text-white transition hover:bg-[#ece8de] hover:text-black disabled:cursor-wait disabled:opacity-70 sm:w-auto"
+      >
+        {sending ? (
+          <>
+            Sending
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+          </>
+        ) : (
+          <>
+            Send message
+            <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </>
         )}
-        <button
-          type="submit"
-          disabled={sending}
-          className="group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-8 py-4 font-bold text-white transition hover:bg-[#ece8de] hover:text-black disabled:cursor-wait disabled:opacity-70 sm:w-auto"
-        >
-          {sending ? (
-            <>
-              Sending
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-            </>
-          ) : (
-            <>
-              Send message
-              <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </>
-          )}
-        </button>
-      </form>
-    </Reveal>
+      </button>
+    </form>
   );
 }
 
@@ -220,23 +211,72 @@ export default function Contact() {
             </div>
           </Reveal>
 
-          <div className="mx-auto mt-10 sm:mt-14 grid max-w-4xl gap-2.5 sm:gap-3 text-left sm:grid-cols-3">
-            {[
-              { k: "Email", v: profile.email, href: `mailto:${profile.email}` },
-              { k: "GitHub", v: "coderhormaz", href: profile.github },
-              { k: "LinkedIn", v: "hormazdaruwala", href: profile.linkedin },
-            ].map((c) => (
-              <a key={c.k} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="group min-w-0 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 transition hover:border-[#ff4d00]/60 hover:bg-white/[0.05]">
-                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/35">{c.k}</p>
-                <p className="mt-2 flex min-w-0 items-center justify-between gap-2 text-sm sm:text-base font-semibold">
-                  <span className="truncate">{c.v}</span>
-                  <ArrowUpRight className="h-4 w-4 shrink-0 text-white/30 transition group-hover:rotate-45 group-hover:text-[#ff4d00]" />
-                </p>
-              </a>
-            ))}
-          </div>
-
-          <ContactForm />
+          <Reveal delay={0.1} className="mx-auto mt-10 sm:mt-14 w-full max-w-5xl">
+            <div className="grid overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.02] text-left backdrop-blur lg:grid-cols-[0.85fr_1.15fr]">
+              {/* info panel */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#ff4d00] via-[#c73e00] to-[#431505] p-7 text-white sm:p-9">
+                <div className="dotgrid absolute inset-0 opacity-25" />
+                <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-white/15 blur-[80px]" />
+                <div className="relative flex h-full flex-col">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/70">
+                    Prefer talking?
+                  </p>
+                  <p className="font-display mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+                    Tell me about your project.
+                  </p>
+                  <ul className="mt-6 space-y-4 text-[15px]">
+                    <li className="flex items-center gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/25">
+                        <Clock className="h-4 w-4" />
+                      </span>
+                      Replies within 24 hours
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/25">
+                        <Briefcase className="h-4 w-4" />
+                      </span>
+                      Freelance and full-time roles
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/25">
+                        <MapPin className="h-4 w-4" />
+                      </span>
+                      Mumbai, working worldwide
+                    </li>
+                  </ul>
+                  <div className="mt-auto flex flex-wrap gap-2 pt-8">
+                    <a
+                      href={`mailto:${profile.email}`}
+                      className="inline-flex min-w-0 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black transition hover:bg-black hover:text-white"
+                    >
+                      <Mail className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{profile.email}</span>
+                    </a>
+                    <a
+                      href={profile.github}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-2.5 text-sm font-semibold transition hover:bg-white hover:text-black"
+                    >
+                      GitHub <ArrowUpRight className="h-4 w-4" />
+                    </a>
+                    <a
+                      href={profile.linkedin}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-2.5 text-sm font-semibold transition hover:bg-white hover:text-black"
+                    >
+                      LinkedIn <ArrowUpRight className="h-4 w-4" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+              {/* form side */}
+              <div className="min-w-0">
+                <ContactForm />
+              </div>
+            </div>
+          </Reveal>
         </motion.div>
 
         <footer className="relative mt-14 sm:mt-20 border-t border-white/10">

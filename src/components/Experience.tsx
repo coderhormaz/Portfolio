@@ -19,29 +19,33 @@ export default function Experience() {
         </h2>
 
         <div ref={ref} className="mt-8 sm:mt-14 grid min-w-0 gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          {/* sticky intro */}
-          <div className="relative">
-            <div className="lg:sticky lg:top-28">
+          {/* sticky intro card */}
+          <div className="relative min-w-0">
+            <div className="lg:sticky lg:top-28 overflow-hidden rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-6 sm:p-8 backdrop-blur">
+              <div className="absolute -top-20 -right-20 h-56 w-56 rounded-full bg-[#ff4d00]/15 blur-[80px]" />
               <Reveal>
-                <p className="max-w-md text-white/55 leading-relaxed md:text-lg">
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#ff4d00]">
+                  The short version
+                </p>
+                <p className="font-display mt-3 text-xl sm:text-2xl font-bold leading-snug tracking-tight text-balance">
                   Real platforms with real users, teams that ship, infrastructure that holds.
+                </p>
+                <p className="mt-3 text-[15px] leading-relaxed text-white/55">
                   I leave every codebase, team and server better than I found it.
                 </p>
               </Reveal>
               <Reveal delay={0.1}>
-                <div className="mt-6 sm:mt-8 grid grid-cols-3 gap-4 sm:flex sm:gap-8 font-display max-w-md">
-                  <div className="min-w-0">
-                    <p className="text-3xl sm:text-4xl font-bold text-[#ff4d00]">4</p>
-                    <p className="mt-1 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-white/40">Roles</p>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-3xl sm:text-4xl font-bold">10+</p>
-                    <p className="mt-1 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-white/40">Modules shipped</p>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-3xl sm:text-4xl font-bold">0</p>
-                    <p className="mt-1 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-white/40">Data lost in migration</p>
-                  </div>
+                <div className="mt-6 grid grid-cols-3 gap-3 border-t border-white/10 pt-6">
+                  {[
+                    { v: "4", l: "Roles", hot: true },
+                    { v: "10+", l: "Modules shipped", hot: false },
+                    { v: "0", l: "Data lost in migration", hot: false },
+                  ].map((s) => (
+                    <div key={s.l} className="min-w-0 rounded-2xl border border-white/10 bg-black/30 px-3 py-4 text-center transition hover:border-[#ff4d00]/50">
+                      <p className={`font-display text-2xl sm:text-3xl font-bold tracking-tight ${s.hot ? "text-[#ff4d00]" : ""}`}>{s.v}</p>
+                      <p className="mt-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] text-white/40 leading-relaxed">{s.l}</p>
+                    </div>
+                  ))}
                 </div>
               </Reveal>
             </div>
