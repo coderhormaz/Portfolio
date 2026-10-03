@@ -1,15 +1,9 @@
 "use client";
 
-import { motion, useScroll, useSpring } from "framer-motion";
-import { useRef } from "react";
 import { experiences } from "@/data/portfolio";
 import { Lines, Reveal, Tag } from "./ui";
 
 export default function Experience() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.75", "end 0.5"] });
-  const scaleY = useSpring(scrollYProgress, { stiffness: 90, damping: 25 });
-
   return (
     <section id="experience" className="relative py-16 sm:py-24 lg:py-36 bg-[#0a0a0c] overflow-x-clip">
       <div className="mx-auto w-full max-w-[1440px] min-w-0 px-5 sm:px-6 lg:px-8">
@@ -18,7 +12,7 @@ export default function Experience() {
           <Lines lines={[<>Proof, not promises.</>]} />
         </h2>
 
-        <div ref={ref} className="mt-8 sm:mt-14 grid min-w-0 gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="mt-8 sm:mt-14 grid min-w-0 gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           {/* sticky intro card */}
           <div className="relative min-w-0">
             <div className="lg:sticky lg:top-28 overflow-hidden rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-6 sm:p-8 backdrop-blur">
@@ -51,18 +45,21 @@ export default function Experience() {
             </div>
           </div>
 
-          {/* timeline */}
-          <div className="relative min-w-0 pl-7 sm:pl-8 lg:pl-10">
-            <div className="absolute bottom-4 left-[6px] sm:left-[7px] top-4 w-px bg-white/10">
-              <motion.div style={{ scaleY }} className="h-full w-full origin-top bg-gradient-to-b from-[#ff4d00] to-[#6c5bff]" />
-            </div>
+          {/* timeline: dots live in their own rail cells, so alignment
+              can never drift regardless of card content or viewport */}
+          <div className="relative min-w-0">
+            <div
+              aria-hidden="true"
+              className="absolute bottom-3 left-[11px] sm:left-[13px] top-3 w-px bg-gradient-to-b from-[#ff4d00]/70 via-[#6c5bff]/40 to-white/10"
+            />
             <div className="space-y-4 sm:space-y-5">
               {experiences.map((exp, i) => (
                 <Reveal key={exp.org + exp.role} delay={i * 0.04}>
-                  <article className="ringline group relative rounded-[1.25rem] sm:rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5 sm:p-7 lg:p-9 backdrop-blur transition hover:bg-white/[0.05]" data-hover>
-                    <span className="absolute left-[-27px] sm:left-[-33px] lg:left-[-41px] top-8 sm:top-9 grid h-4 w-4 place-items-center">
-                      <span className={`h-3 w-3 rounded-full border-2 ${i === 0 ? "bg-[#ff4d00] border-[#ff4d00]" : "bg-[#0a0a0c] border-white/30 group-hover:border-[#ff4d00]"}`} />
-                    </span>
+                  <div className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)] sm:grid-cols-[28px_minmax(0,1fr)] gap-2 sm:gap-3">
+                    <div aria-hidden="true" className="flex justify-center pt-[34px] sm:pt-[38px]">
+                      <span className={`h-3 w-3 shrink-0 rounded-full border-2 ${i === 0 ? "bg-[#ff4d00] border-[#ff4d00] shadow-[0_0_12px_rgba(255,77,0,0.8)]" : "bg-[#0a0a0c] border-white/30"}`} />
+                    </div>
+                  <article className="ringline group relative min-w-0 rounded-[1.25rem] sm:rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5 sm:p-7 lg:p-9 backdrop-blur transition hover:bg-white/[0.05]" data-hover>
                     <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.2em]">
                       <span className="rounded-full bg-[#ff4d00] px-3 py-1 font-bold text-white">{exp.period}</span>
                       <span className="text-white/40">{exp.orgDetail}</span>
@@ -84,6 +81,7 @@ export default function Experience() {
                       ))}
                     </div>
                   </article>
+                  </div>
                 </Reveal>
               ))}
             </div>

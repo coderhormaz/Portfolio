@@ -14,7 +14,12 @@ export default function Work() {
   const [range, setRange] = useState(0);
 
   const { scrollYProgress } = useScroll({ target: targetRef });
-  const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 26 });
+  /* On touch devices the smoothed spring feels laggy: map scroll directly.
+     (useState initializer runs once, so hook order stays stable.) */
+  const [coarse] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
+  );
+  const smooth = useSpring(scrollYProgress, { stiffness: 110, damping: 30 });
 
   useEffect(() => {
     const measure = () => {
@@ -30,9 +35,9 @@ export default function Work() {
     };
   }, []);
 
-  const x = useTransform(smooth, [0, 1], [0, -range]);
+  const x = useTransform(coarse ? scrollYProgress : smooth, [0, 1], [0, -range]);
   /* cover art drifts against the scroll for depth */
-  const artX = useTransform(smooth, [0, 1], ["2.5%", "-2.5%"]);
+  const artX = useTransform(coarse ? scrollYProgress : smooth, [0, 1], ["2.5%", "-2.5%"]);
 
   const total = clientProjects.length;
   const [active, setActive] = useState(0);
@@ -100,8 +105,8 @@ export default function Work() {
         </div>
       </div>
 
-      {/* pinned horizontal track */}
-      <div ref={targetRef} className="relative h-[300vh]">
+      {/* pinned horizontal track: shorter pin on phones = snappier feel */}
+      <div ref={targetRef} className="relative h-[220vh] sm:h-[260vh] lg:h-[300vh]">
         <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden">
           <motion.div
             ref={trackRef}
@@ -113,7 +118,7 @@ export default function Work() {
                 key={p.title}
                 whileHover={{ y: -8 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative flex h-[64svh] sm:h-[66svh] lg:h-[70svh] w-[84vw] sm:w-[62vw] lg:w-[44vw] xl:w-[38vw] shrink-0 flex-col overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] bg-[#f2efe7] text-[#131313] shadow-[0_30px_80px_rgba(0,0,0,0.5)] ring-1 ring-white/10"
+                className="group relative flex h-[64svh] sm:h-[66svh] lg:h-[70svh] w-[84vw] sm:w-[62vw] lg:w-[44vw] xl:w-[38vw] shrink-0 flex-col overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] bg-[#f2efe7] text-[#131313] shadow-[0_16px_44px_rgba(0,0,0,0.5)] lg:shadow-[0_30px_80px_rgba(0,0,0,0.5)] ring-1 ring-white/10"
                 data-hover
               >
                 {/* cover: fixed share of the card, type sized to always fit inside */}
