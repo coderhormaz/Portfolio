@@ -1,0 +1,20 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hd-ring" x1="24" y1="24" x2="156" y2="156" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF4D00"/>
+      <stop offset="1" stop-color="#6C5BFF"/>
+    </linearGradient>
+    <radialGradient id="hd-bg" cx="0.5" cy="0.32" r="0.95">
+      <stop offset="0" stop-color="#1D1D24"/>
+      <stop offset="1" stop-color="#0A0A0C"/>
+    </radialGradient>
+  </defs>
+  <rect width="180" height="180" rx="42" fill="url(#hd-bg)"/>
+  <rect x="9" y="9" width="162" height="162" rx="34" stroke="url(#hd-ring)" stroke-width="5"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M50 54 V126" stroke="#ECE8DE" stroke-width="15"/>
+    <path d="M50 90 H94" stroke="#FF4D00" stroke-width="15"/>
+    <path d="M94 54 V126" stroke="#ECE8DE" stroke-width="15"/>
+    <path d="M94 54 C132 54 143 70 143 90 C143 110 132 126 94 126" stroke="#ECE8DE" stroke-width="15"/>
+  </g>
+</svg>
