@@ -103,7 +103,11 @@ export default function Navbar() {
             </span>
             <a
               href="#contact"
-              className="group hidden min-[400px]:inline-flex items-center gap-1.5 rounded-full bg-[#ff4d00] px-4 sm:px-5 py-2.5 sm:py-3 text-[13px] font-bold text-white transition hover:bg-[#ece8de] hover:text-black"
+              tabIndex={open ? -1 : undefined}
+              aria-hidden={open}
+              className={`group hidden min-[400px]:inline-flex items-center gap-1.5 rounded-full bg-[#ff4d00] px-4 sm:px-5 py-2.5 sm:py-3 text-[13px] font-bold text-white transition-all duration-300 hover:bg-[#ece8de] hover:text-black ${
+                open ? "pointer-events-none -translate-y-1 opacity-0" : "opacity-100"
+              }`}
             >
               Let&apos;s talk
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
@@ -126,27 +130,39 @@ export default function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] flex flex-col justify-end bg-[#0a0a0c]/95 backdrop-blur-2xl lg:hidden"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[110] flex h-[100dvh] flex-col bg-[#0a0a0c]/95 backdrop-blur-2xl lg:hidden"
             onClick={() => setOpen(false)}
           >
-            <nav className="max-h-[70dvh] overflow-y-auto px-5 sm:px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-2" onClick={(e) => e.stopPropagation()}>
+            {/* spacer for the fixed header */}
+            <div className="h-[92px] shrink-0 sm:h-[96px]" />
+            <nav
+              className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-5 sm:px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+              onClick={(e) => e.stopPropagation()}
+            >
               {navLinks.map((l, i) => (
                 <motion.a
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * i, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex items-center justify-between gap-3 border-b border-white/10 py-3.5 sm:py-4 font-display text-[clamp(1.75rem,8vw,2.5rem)] font-bold tracking-tight"
+                  transition={{ delay: 0.04 * i, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex items-center justify-between gap-3 border-b border-white/10 py-2.5 sm:py-3 font-display text-[1.65rem] sm:text-3xl font-bold tracking-tight"
                 >
                   <span className="flex min-w-0 items-baseline gap-3"><span className="font-mono text-xs text-[#ff4d00]">0{i + 1}</span> <span className="truncate">{l.label}</span></span>
-                  <ArrowUpRight className="h-6 w-6 shrink-0 text-[#ff4d00]" />
+                  <ArrowUpRight className="h-5 w-5 shrink-0 text-[#ff4d00]" />
                 </motion.a>
               ))}
-              <a href={`mailto:${profile.email}`} className="mt-6 block break-all rounded-2xl bg-[#ff4d00] p-5 text-center text-sm sm:text-base font-bold text-white">
+              <motion.a
+                href={`mailto:${profile.email}`}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.28, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="mt-4 block break-all rounded-2xl bg-[#ff4d00] p-4 text-center text-sm font-bold text-white"
+              >
                 {profile.email}
-              </a>
+              </motion.a>
             </nav>
           </motion.div>
         )}
