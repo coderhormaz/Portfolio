@@ -2,7 +2,7 @@
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
-import { ArrowDown, ArrowUpRight, Copy, Check, MapPin } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Copy, Check, FileText, MapPin } from "lucide-react";
 import { profile } from "@/data/portfolio";
 import { CountUp, EASE, Magnetic } from "./ui";
 
@@ -163,7 +163,7 @@ export default function Hero() {
             >
               5+ years building high-impact web apps, blockchain systems and mobile
               experiences. Zero-loss Postgres migrations, a published Play Store app,
-              and have taken part in over 20+ hackathons.
+              15+ hackathons including a first-place finish and an ETH Mumbai bounty.
             </motion.p>
 
             <motion.div
@@ -192,6 +192,16 @@ export default function Hero() {
                   <span className="hidden min-[440px]:inline truncate">{copied ? "Copied!" : profile.email}</span>
                   <span className="min-[440px]:hidden">{copied ? "Copied!" : "Copy email"}</span>
                 </button>
+              </Magnetic>
+              <Magnetic>
+                <a
+                  href={profile.resume}
+                  download={profile.resumeLabel}
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-3 font-mono text-[12px] backdrop-blur transition hover:border-[#ff4d00]/70 hover:text-white sm:text-[13px]"
+                >
+                  <FileText className="h-4 w-4 shrink-0 text-white/50 transition group-hover:text-[#ff4d00]" />
+                  Résumé
+                </a>
               </Magnetic>
               <a
                 href={profile.github}

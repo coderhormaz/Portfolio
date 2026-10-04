@@ -5,6 +5,7 @@ import Experience from "@/components/Experience";
 import Work from "@/components/Work";
 import Projects from "@/components/Projects";
 import Skills from "@/components/Skills";
+import Faq from "@/components/Faq";
 import Contact from "@/components/Contact";
 import { marqueeItems } from "@/data/portfolio";
 
@@ -22,6 +23,7 @@ export default function Home() {
       <Work />
       <Projects />
       <Skills />
+      <Faq />
       <Contact />
     </>
   );

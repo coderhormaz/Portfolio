@@ -2,16 +2,17 @@
 
 import { motion } from "framer-motion";
 import { skillGroups, marqueeItems } from "@/data/portfolio";
-import { Lines, Reveal, Tag } from "./ui";
+import { Reveal, SectionHead } from "./ui";
 
 export default function Skills() {
   return (
     <section id="stack" className="relative bg-[#0a0a0c] text-[#ece8de] py-16 sm:py-24 lg:py-36 overflow-hidden">
       <div className="mx-auto w-full max-w-[1440px] min-w-0 px-5 sm:px-6 lg:px-8">
-        <Tag index="05" label="Arsenal · Tools I reach for" />
-        <h2 className="font-display h-display-section mt-6 sm:mt-8 font-bold tracking-[-0.03em] leading-[1.0] text-balance">
-          <Lines lines={[<>Fluent in <span className="font-serif-accent font-normal">shipping.</span></>]} />
-        </h2>
+        <SectionHead
+          index="05"
+          eyebrow="Arsenal · Tools I reach for"
+          lines={[<>Fluent in <span className="font-serif-accent font-normal">shipping.</span></>]}
+        />
 
         <div className="mt-8 sm:mt-12 grid min-w-0 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
           {skillGroups.map((g, gi) => (

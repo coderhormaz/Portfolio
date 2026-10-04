@@ -71,6 +71,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
             alt="Hormaz Daruwala logo"
             width={32}
             height={32}
+            priority
             className="h-8 w-8 rounded-lg"
           />
           <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.3em] text-white/50">
@@ -98,7 +99,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
             Folio 2026 · Mumbai
           </motion.span>
         </p>
-        <h1 className="font-display mt-3 font-bold leading-[0.92] tracking-[-0.03em] text-[clamp(2.8rem,10vw,6.5rem)]">
+        <p className="font-display mt-3 font-bold leading-[0.92] tracking-[-0.03em] text-[clamp(2.8rem,10vw,6.5rem)]" aria-hidden="true">
           <span className="block overflow-hidden pb-1">
             <motion.span
               className="block"
@@ -120,7 +121,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
               <span className="text-[#ff4d00]">.</span>
             </motion.span>
           </span>
-        </h1>
+        </p>
       </motion.div>
 
       {/* bottom: label + counter + bar */}
@@ -160,18 +161,12 @@ export function PreloaderGate({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {/* Always render content so it is server-rendered and crawlable.
+          The preloader is an overlay, not a gate. */}
+      {children}
       <AnimatePresence>
         {loading && <Preloader onDone={() => setLoading(false)} />}
       </AnimatePresence>
-      {!loading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-        >
-          {children}
-        </motion.div>
-      )}
     </>
   );
 }

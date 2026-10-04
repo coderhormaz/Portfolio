@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import { ArrowUpRight, Asterisk } from "lucide-react";
 import { education, profile } from "@/data/portfolio";
-import { CountUp, Lines, Reveal, Tag } from "./ui";
+import { CountUp, Reveal, SectionHead } from "./ui";
 
 const services = [
   { n: "01", t: "Full-stack platforms", d: "Next.js, APIs, Postgres, auth & RBAC, admin systems that scale." },
@@ -17,7 +17,7 @@ const services = [
 
 const facts = [
   { v: 5, s: "+", l: "Years shipping" },
-  { v: 20, s: "+", l: "Hackathons" },
+  { v: 15, s: "+", l: "Hackathons" },
   { v: 4, s: "", l: "Roles led" },
   { v: 10, s: "+", l: "Live launches" },
 ];
@@ -31,16 +31,14 @@ export default function About() {
     <section ref={ref} id="about" className="relative bg-[#0e0e11] text-[#ece8de] py-16 sm:py-24 lg:py-36 overflow-hidden">
       <div className="blueprint pointer-events-none absolute inset-0 opacity-70" />
       <div className="relative mx-auto w-full max-w-[1440px] min-w-0 px-5 sm:px-6 lg:px-8">
-        <Tag index="01" label="About · Who I am" />
-
-        <h2 className="font-display h-display-section mt-6 sm:mt-8 max-w-6xl font-bold leading-[1.02] tracking-[-0.03em] text-balance">
-          <Lines
-            lines={[
-              <>I build the product</>,
-              <>and run the <span className="font-serif-accent font-normal">infrastructure.</span></>,
-            ]}
-          />
-        </h2>
+        <SectionHead
+          index="01"
+          eyebrow="About · Who I am"
+          lines={[
+            <>I build the product</>,
+            <>and run the <span className="font-serif-accent font-normal">infrastructure.</span></>,
+          ]}
+        />
 
         <div className="mt-8 sm:mt-12 grid min-w-0 gap-8 sm:gap-10 lg:grid-cols-[1.15fr_0.85fr]">
           {/* left: story + services */}

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { clientProjects } from "@/data/portfolio";
-import { Lines, Reveal, Tag } from "./ui";
+import { SectionHead } from "./ui";
 import ProjectArt from "./ProjectArt";
 
 export default function Work() {
@@ -50,10 +50,15 @@ export default function Work() {
     return (
       <section id="work" className="relative bg-[#0e0e12] text-[#ece8de] py-16 sm:py-24 lg:py-36 overflow-x-clip">
         <div className="mx-auto w-full max-w-[1440px] min-w-0 px-5 sm:px-6 lg:px-8">
-          <Tag index="03" label="Selected work · Live in production" />
-          <h2 className="font-display h-display-section mt-6 sm:mt-8 font-bold tracking-[-0.03em] leading-[1.0] text-balance">
-            <Lines lines={[<>Proof of</>, <><span className="font-serif-accent font-normal">work.</span> <span className="text-ghost">04</span></>]} />
-          </h2>
+          <SectionHead
+            index="03"
+            eyebrow="Selected work · Live in production"
+            ghost="04"
+            lines={[
+              <>Proof of</>,
+              <><span className="font-serif-accent font-normal">work.</span></>,
+            ]}
+          />
           <div className="mt-8 space-y-4">
             {clientProjects.map((p, i) => (
               <article key={p.title} className="overflow-hidden rounded-[1.5rem] bg-[#f2efe7] text-[#131313] ring-1 ring-white/10">
@@ -81,17 +86,16 @@ export default function Work() {
     <section id="work" className="relative bg-[#0e0e12] text-[#ece8de] overflow-x-clip">
       {/* header in normal flow */}
       <div className="mx-auto w-full max-w-[1440px] min-w-0 px-5 sm:px-6 lg:px-8 pt-16 sm:pt-24 lg:pt-32">
-        <Tag index="03" label="Selected work · Live in production" />
-        <div className="mt-6 sm:mt-8 flex flex-col md:flex-row md:flex-wrap md:items-end md:justify-between gap-4 md:gap-6">
-          <h2 className="font-display h-display-section font-bold tracking-[-0.03em] leading-[1.0] text-balance">
-            <Lines lines={[<>Proof of</>, <><span className="font-serif-accent font-normal">work.</span> <span className="text-ghost">04</span></>]} />
-          </h2>
-          <Reveal delay={0.15}>
-            <p className="max-w-sm text-white/55 leading-relaxed">
-              Real businesses on my builds: CMS admin panels, auth, bookings, eCommerce and SEO.
-            </p>
-          </Reveal>
-        </div>
+        <SectionHead
+          index="03"
+          eyebrow="Selected work · Live in production"
+          ghost="04"
+          lines={[
+            <>Proof of</>,
+            <><span className="font-serif-accent font-normal">work.</span></>,
+          ]}
+          description="Real businesses on my builds: CMS admin panels, auth, bookings, eCommerce and SEO."
+        />
         <div className="mt-6 flex items-center gap-3">
           <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-[#ff4d00]/40 bg-[#ff4d00]/10 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[#ff8a4d] shrink-0">
             Keep scrolling <ArrowRight className="h-3.5 w-3.5 animate-pulse" />

@@ -10,7 +10,9 @@ export default function Marquee({ items, dark = false, fast = false }: { items: 
   const smooth = useSpring(velocity, { stiffness: 120, damping: 30 });
   const skew = useTransform(smooth, [-2500, 2500], [-8, 8]);
 
-  const row = [...items, ...items, ...items];
+  /* Exactly two copies: the keyframe translates -50%, which equals one full
+     set, so the loop restarts on an identical frame with no visible jump. */
+  const row = [...items, ...items];
 
   return (
     <div ref={ref} className={`relative overflow-hidden border-y py-3.5 sm:py-4 lg:py-5 ${dark ? "border-white/10 bg-[#0d0d10] text-[#ece8de]" : "border-[#131313]/10 bg-[#ff4d00] text-white"}`}>
