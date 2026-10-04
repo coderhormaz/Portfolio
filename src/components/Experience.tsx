@@ -1,19 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
+import { useRef } from "react";
 import { experiences } from "@/data/portfolio";
 import { Reveal, SectionHead } from "./ui";
 
 export default function Experience() {
-  const reduce = useReducedMotion();
-  const listRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: listRef, offset: ["start 0.8", "end 0.5"] });
-  const progress = useSpring(scrollYProgress, { stiffness: 90, damping: 25 });
-  const [active, setActive] = useState(0);
-  useMotionValueEvent(scrollYProgress, "change", (v) =>
-    setActive(Math.min(experiences.length - 1, Math.max(0, Math.floor(v * experiences.length))))
-  );
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.75", "end 0.5"] });
+  const scaleY = useSpring(scrollYProgress, { stiffness: 90, damping: 25 });
 
   return (
     <section id="experience" className="relative py-16 sm:py-24 lg:py-36 bg-[#0a0a0c] overflow-x-clip">
@@ -21,10 +16,10 @@ export default function Experience() {
         <SectionHead
           index="02"
           eyebrow="Experience · Where I've shipped"
-          lines={[<>Proof, not promises.</>]}
+          lines={[<>Proof, not <span className="font-serif-accent font-normal text-[#ff4d00]">promises.</span></>]}
         />
 
-        <div className="mt-8 sm:mt-14 grid min-w-0 gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+        <div ref={ref} className="mt-8 sm:mt-14 grid min-w-0 gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           {/* sticky intro card */}
           <div className="relative min-w-0">
             <div className="lg:sticky lg:top-28 overflow-hidden rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent p-6 sm:p-8 backdrop-blur">
@@ -57,52 +52,18 @@ export default function Experience() {
             </div>
           </div>
 
-          {/* timeline: dots live in their own rail cells, so alignment
-              can never drift regardless of card content or viewport.
-              The progress fill + dot glow ride the same scroll spring. */}
-          <div ref={listRef} className="relative min-w-0">
-            {/* base track */}
-            <div
-              aria-hidden="true"
-              className="absolute bottom-2 left-[11px] top-2 w-[2px] rounded-full bg-white/10 sm:left-[13px]"
-            />
-            {/* glowing scroll progress + bloom */}
-            {reduce ? (
-              <div
-                aria-hidden="true"
-                className="absolute bottom-2 left-[11px] top-2 w-[2px] rounded-full bg-gradient-to-b from-[#ff4d00]/70 via-[#6c5bff]/40 to-white/10 sm:left-[13px]"
-              />
-            ) : (
-              <>
-                <motion.div
-                  aria-hidden="true"
-                  style={{ scaleY: progress }}
-                  className="absolute bottom-2 left-[9px] top-2 w-[6px] origin-top rounded-full bg-[#ff4d00]/40 blur-[8px] sm:left-[11px]"
-                />
-                <motion.div
-                  aria-hidden="true"
-                  style={{ scaleY: progress }}
-                  className="absolute bottom-2 left-[11px] top-2 w-[2px] origin-top rounded-full bg-gradient-to-b from-[#ff4d00] via-[#ff8a4d] to-[#6c5bff] shadow-[0_0_16px_rgba(255,77,0,0.85)] sm:left-[13px]"
-                />
-              </>
-            )}
+          {/* timeline: v3 look (thin rail + scroll gradient fill + static dots),
+              with dots in rail cells so alignment holds on every viewport */}
+          <div className="relative min-w-0">
+            <div aria-hidden="true" className="absolute bottom-4 left-[11.5px] top-4 w-px bg-white/10 sm:left-[13.5px]">
+              <motion.div style={{ scaleY }} className="h-full w-full origin-top bg-gradient-to-b from-[#ff4d00] to-[#6c5bff]" />
+            </div>
             <div className="space-y-4 sm:space-y-5">
               {experiences.map((exp, i) => (
                 <Reveal key={exp.org + exp.role} delay={i * 0.04}>
-                  <div className="grid min-w-0 grid-cols-[24px_minmax(0,1fr)] sm:grid-cols-[28px_minmax(0,1fr)] gap-2 sm:gap-3">
+                  <div className="group grid min-w-0 grid-cols-[24px_minmax(0,1fr)] sm:grid-cols-[28px_minmax(0,1fr)] gap-2 sm:gap-3">
                     <div aria-hidden="true" className="flex justify-center pt-[34px] sm:pt-[38px]">
-                      <span className="relative grid h-3 w-3 shrink-0 place-items-center">
-                        <span
-                          className={`h-3 w-3 rounded-full border-2 transition-all duration-500 ${
-                            i <= active
-                              ? "border-[#ff4d00] bg-[#ff4d00] shadow-[0_0_14px_rgba(255,77,0,0.9)]"
-                              : "border-white/30 bg-[#0a0a0c]"
-                          }`}
-                        />
-                        {i === active && !reduce && (
-                          <span className="absolute inset-0 animate-ping rounded-full bg-[#ff4d00]/60" />
-                        )}
-                      </span>
+                      <span className={`h-3 w-3 shrink-0 rounded-full border-2 ${i === 0 ? "bg-[#ff4d00] border-[#ff4d00]" : "bg-[#0a0a0c] border-white/30 group-hover:border-[#ff4d00]"}`} />
                     </div>
                   <article className="ringline group relative min-w-0 rounded-[1.25rem] sm:rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5 sm:p-7 lg:p-9 backdrop-blur transition hover:bg-white/[0.05]" data-hover>
                     <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.2em]">

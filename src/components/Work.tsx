@@ -56,7 +56,7 @@ export default function Work() {
             ghost="04"
             lines={[
               <>Proof of</>,
-              <><span className="font-serif-accent font-normal">work.</span></>,
+            <><span className="font-serif-accent font-normal text-[#ff4d00]">work.</span></>,
             ]}
           />
           <div className="mt-8 space-y-4">
@@ -92,7 +92,7 @@ export default function Work() {
           ghost="04"
           lines={[
             <>Proof of</>,
-            <><span className="font-serif-accent font-normal">work.</span></>,
+            <><span className="font-serif-accent font-normal text-[#ff4d00]">work.</span></>,
           ]}
           description="Real businesses on my builds: CMS admin panels, auth, bookings, eCommerce and SEO."
         />

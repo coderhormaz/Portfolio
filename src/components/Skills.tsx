@@ -11,7 +11,7 @@ export default function Skills() {
         <SectionHead
           index="05"
           eyebrow="Arsenal · Tools I reach for"
-          lines={[<>Fluent in <span className="font-serif-accent font-normal">shipping.</span></>]}
+          lines={[<>Fluent in <span className="font-serif-accent font-normal text-[#ff4d00]">shipping.</span></>]}
         />
 
         <div className="mt-8 sm:mt-12 grid min-w-0 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">

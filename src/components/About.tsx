@@ -36,7 +36,7 @@ export default function About() {
           eyebrow="About · Who I am"
           lines={[
             <>I build the product</>,
-            <>and run the <span className="font-serif-accent font-normal">infrastructure.</span></>,
+            <>and run the <span className="font-serif-accent font-normal text-[#ff4d00]">infrastructure.</span></>,
           ]}
         />
 
