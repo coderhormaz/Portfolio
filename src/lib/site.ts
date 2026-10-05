@@ -5,6 +5,6 @@
  */
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://hormaz.vercel.app";
+  "https://hormazdaruwala.vercel.app";
 
 export const SITE_NAME = "Hormaz Daruwala";

@@ -13,7 +13,7 @@ export const profile = {
   email: "hormazdaruwala86@gmail.com",
   phone: "+91 9082920942",
   location: "Mumbai, India",
-  portfolio: "hormaz.vercel.app",
+  portfolio: "hormazdaruwala.vercel.app",
   github: "https://github.com/coderhormaz",
   linkedin: "https://linkedin.com/in/hormazdaruwala",
   availability: "Open to freelance & full-time",
@@ -116,6 +116,8 @@ export type Project = {
   featured?: boolean;
   image?: string;
   video?: string;
+  /** Explicit poster override. Otherwise derived: /x.mp4 -> /posters/x.jpg */
+  poster?: string;
   award?: "bounty" | "first" | null;
   /** year shipped */
   year?: string;
@@ -125,6 +127,18 @@ export type Project = {
   highlights?: string[];
   metrics?: { v: string; l: string }[];
 };
+
+/**
+ * Poster shown before a demo video loads any bytes.
+ * Convention: /x.mp4 -> /posters/x.jpg (explicit `poster` wins).
+ * Cards use preload="none" + poster so crawlers and visitors never
+ * download video until they choose to play it.
+ */
+export function posterFor(p: { video?: string; poster?: string }): string | undefined {
+  if (p.poster) return p.poster;
+  if (!p.video) return undefined;
+  return p.video.replace(/\.mp4$/i, ".jpg").replace(/^\//, "/posters/");
+}
 
 export const clientProjects: Project[] = [
   {

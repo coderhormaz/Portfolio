@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Instrument_Serif, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
@@ -78,6 +79,34 @@ export const viewport: Viewport = {
   themeColor: "#0a0a0c",
 };
 
+/* Self-hosted via next/font: zero fonts.gstatic.com requests,
+   so crawlers and visitors never depend on the Google Fonts CDN. */
+const grotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-grotesk",
+  display: "swap",
+});
+const instrument = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-instrument",
+  display: "swap",
+});
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+const spacemono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-spacemono",
+  display: "swap",
+});
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const personJsonLd = {
     "@context": "https://schema.org",
@@ -113,16 +142,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en" className="dark">
+    <html
+      lang="en"
+      className={`dark ${grotesk.variable} ${instrument.variable} ${inter.variable} ${spacemono.variable}`}
+    >
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
-        <style>{`:root{--font-display:"Space Grotesk",sans-serif;--font-serif2:"Instrument Serif",serif;--font-body:"Inter",sans-serif;--font-mono:"Space Mono",monospace;}`}</style>
       </head>
       <body className="grain min-h-screen overflow-x-clip bg-[#0a0a0c] text-[#ece8de] antialiased">
         <script

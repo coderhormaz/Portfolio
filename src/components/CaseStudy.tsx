@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Code2, Pause, Play, X } from "lucide-react";
-import type { Project } from "@/data/portfolio";
+import { posterFor, type Project } from "@/data/portfolio";
 import { EASE } from "./ui";
 import ProjectArt from "./ProjectArt";
 
@@ -26,10 +26,11 @@ function Media({ p, i }: { p: Project; i: number }) {
           ref={ref}
           key={p.video}
           src={p.video}
+          poster={posterFor(p)}
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           aria-label={`${p.title} demo`}
           className="aspect-video w-full bg-[#08080b] object-contain"
         />

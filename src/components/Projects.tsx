@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, ArrowUpRight, Medal } from "lucide-react";
-import { personalProjects, hackathons, type Project } from "@/data/portfolio";
+import { personalProjects, hackathons, posterFor, type Project } from "@/data/portfolio";
 import { Reveal, SectionHead } from "./ui";
 import ProjectArt from "./ProjectArt";
 import CaseStudy from "./CaseStudy";
@@ -43,10 +43,11 @@ function Media({
       <video
         ref={videoRef}
         src={video}
+        poster={posterFor({ video })}
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="none"
         aria-label={`${title} demo`}
         className="absolute inset-0 h-full w-full bg-[#0c0c0f] object-contain"
       />

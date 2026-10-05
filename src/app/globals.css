@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-serif2: "Instrument Serif", ui-serif, Georgia, serif;
-  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Space Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-display: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-serif2: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-spacemono), ui-monospace, monospace;
 
   --color-void: #0a0a0c;
   --color-coal: #121214;
