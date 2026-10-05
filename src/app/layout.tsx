@@ -50,10 +50,10 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: `${SITE_URL}/aiskool.png`,
+        url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "AISkool EdTech platform built by Hormaz Daruwala",
+        alt: "Hormaz Daruwala — Full-Stack, Web3 and Design Engineer portfolio",
       },
     ],
   },
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     title: "Hormaz Daruwala — Full-Stack, Web3 & Design Engineer",
     description:
       "Production platforms, on-chain systems and apps with editorial-grade design.",
-    images: [`${SITE_URL}/aiskool.png`],
+    images: [`${SITE_URL}/og-image.jpg`],
   },
   icons: {
     icon: [{ url: "/logo.svg", type: "image/svg+xml" }],

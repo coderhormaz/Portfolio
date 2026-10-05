@@ -152,7 +152,7 @@ export const clientProjects: Project[] = [
     ],
   },
   {
-    title: "Aureline",
+    title: "Aurenext",
     subtitle: "Dermatology & Skincare Platform",
     description:
       "Consultation booking, skincare eCommerce (cart, orders, stock alerts), revenue analytics dashboard, admin controls and doctor profile.",
