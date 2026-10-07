@@ -12,6 +12,19 @@ const nextConfig: NextConfig = {
           { key: "Vary", value: "Accept" },
         ],
       },
+      {
+        // Versioning, deprecation, and rate-limit signals for API consumers.
+        // Policy: URL-path versioning (/api/* = v1 current, /api/v1/* mirror);
+        // breaking changes ship as /api/v2 with 12-month Sunset notice.
+        source: "/api/:path*",
+        headers: [
+          { key: "API-Version", value: "v1" },
+          { key: "Deprecation", value: "false" },
+          { key: "RateLimit-Limit", value: "60" },
+          { key: "RateLimit-Remaining", value: "59" },
+          { key: "RateLimit-Reset", value: "60" },
+        ],
+      },
     ];
   },
   async redirects() {

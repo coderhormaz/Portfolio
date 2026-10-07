@@ -67,7 +67,21 @@ export default function DevelopersPage() {
         so agents learn auth requirements from one request. Agent
         credential flow (anonymous, identity_assertion with ID-JAG, or
         service_auth) is documented in <a className="underline" href="/auth.md">/auth.md</a> with
-        reachable identity, claim, and events endpoints.
+        reachable identity, claim, and events endpoints. Self-serve a free
+        demo key with <code>POST /api/agent/key</code> (free tier: all
+        reads are keyless, no signup).
+      </p>
+      <h2 className="mt-10 text-2xl font-bold">Versioning, limits, retries</h2>
+      <p className="mt-3 leading-relaxed text-white/60">
+        URL-path versioning (<code>/api/*</code> v1 current, mirrored at{" "}
+        <code>/api/v1/*</code>), <code>API-Version</code> +{" "}
+        <code>Deprecation</code> headers, 12-month Sunset policy. Demo
+        rate limit 60 req/min via <code>RateLimit-*</code> headers.
+        Retries are safe: send <code>Idempotency-Key</code> on POST
+        writes. Paginate lists with <code>limit/cursor</code>; bulk reads
+        via <code>POST /api/batch</code>; poll long work at{" "}
+        <code>GET /api/jobs/{"{id}"}</code>. Sandbox guide:{" "}
+        <a className="underline" href="/sandbox">/sandbox</a>.
       </p>
     </section>
   );

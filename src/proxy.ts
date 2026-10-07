@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { HOME_MARKDOWN, markdownFor } from "@/lib/markdown";
+import { HOME_MARKDOWN, markdownFor, genericMarkdownFor } from "@/lib/markdown";
+import { SKILL_DOCS } from "@/lib/skills";
 
 const SITE = "https://hormazdaruwala.vercel.app";
 const BOT_UAS = [
@@ -85,11 +86,17 @@ const KNOWN_EXACT = new Set([
   "/api/contact",
   "/api/health",
   "/api/sandbox",
+  "/api/batch",
   "/api/mcp",
+  "/api/docs-mcp",
   "/api/agent/identity",
   "/api/agent/claim",
   "/api/agent/events",
+  "/api/agent/key",
   "/api/llms.txt",
+  "/sandbox",
+  "/sandbox.md",
+  "/plugin.json",
   "/docs/llms.txt",
   "/developers/llms.txt",
   "/.well-known/ard.json",
@@ -97,6 +104,7 @@ const KNOWN_EXACT = new Set([
   "/.well-known/agent-skills/index.json",
   "/.well-known/mcp",
   "/.well-known/mcp/server-card.json",
+  "/.well-known/mcp/docs-server-card.json",
   "/.well-known/api-catalog",
   "/.well-known/oauth-protected-resource",
   "/.well-known/oauth-authorization-server",
@@ -112,7 +120,8 @@ const KNOWN_EXACT = new Set([
 function isKnown(path: string): boolean {
   if (KNOWN_EXACT.has(path)) return true;
   if (path.startsWith("/.well-known/")) return true;
-  if (path.startsWith("/api/")) return true;
+  if (path.startsWith("/api/") || path.startsWith("/api/v1/")) return true;
+  if (path.startsWith("/skills/")) return true;
   if (path.startsWith("/feeds/")) return true;
   if (path.endsWith(".md") || path.endsWith(".txt")) {
     const base = path.replace(/\.md$/, "").replace(/\.txt$/, "");
@@ -164,6 +173,13 @@ export function proxy(request: NextRequest) {
         openapi: `${SITE}/openapi.json`,
         pricing: `${SITE}/pricing.md`,
       },
+      auth: {
+        walkthrough: `${SITE}/auth.md`,
+        resource_metadata: `${SITE}/.well-known/oauth-protected-resource`,
+        authorization_server: `${SITE}/.well-known/oauth-authorization-server`,
+        schemes: ["anonymous", "identity_assertion", "service_auth"],
+      },
+      docs_portal: `${SITE}/developers`,
       capabilities: ["profile.lookup", "projects.search", "contact.validate", "ask.answer", "mcp.tools"],
     });
     res.headers.set("Vary", "Accept");
@@ -182,20 +198,17 @@ export function proxy(request: NextRequest) {
     return withLink(res, path);
   }
 
-  // Generic .md twin fallback: /foo -> markdown twin when Accept markdown or direct .md hit
+  // Generic .md twin: every page (content, API, well-known) has a markdown twin.
+  // Unknown twins get a generated doc (200) so agents can always append .md.
   if (path.endsWith(".md")) {
     const base = path.replace(/\.md$/, "") || "/";
-    const md = markdownFor(path) || markdownFor(base === "" ? "/" : base);
-    if (md) return withLink(markdownResponse(md), path);
-    if (wantsMarkdown || bot) {
-      return withLink(
-        markdownResponse(
-          `# Not found\n\nNo markdown twin for ${path}. See /llms.txt, /docs, or /sitemap.xml.\n`,
-          404,
-        ),
-        path,
-      );
+    // Skill-md artifacts (digests in the v0.2.0 index are computed over these exact bytes)
+    if (base.startsWith("/skills/")) {
+      const doc = SKILL_DOCS[base.slice("/skills/".length)];
+      if (doc) return withLink(markdownResponse(doc), path);
     }
+    const md = markdownFor(path) || markdownFor(base === "" ? "/" : base) || genericMarkdownFor(path);
+    return withLink(markdownResponse(md), path);
   }
 
   // Agent-friendly 404 markdown for unknown paths
@@ -207,6 +220,26 @@ export function proxy(request: NextRequest) {
       ),
       path,
     );
+  }
+
+  // JSON 405 (not HTML) for unsupported API methods
+  if (
+    (path === "/api" || path.startsWith("/api/")) &&
+    !["GET", "POST", "OPTIONS", "HEAD"].includes(request.method)
+  ) {
+    const res = NextResponse.json(
+      {
+        error: {
+          code: "method_not_allowed",
+          message: `Method ${request.method} is not supported on ${path}.`,
+          hint: "Use GET for reads and POST for contact, batch, MCP, ask, and agent endpoints. See /docs.",
+          docs: `${SITE}/docs`,
+        },
+      },
+      { status: 405 },
+    );
+    res.headers.set("Allow", "GET, POST, OPTIONS");
+    return withLink(res, path);
   }
 
   // Pass through + Link/Vary headers

@@ -46,3 +46,30 @@ export function requireAuth(req: Request): boolean {
     req.headers.get("authorization") || req.headers.get("x-api-key"),
   );
 }
+
+type IdemEntry = { status: number; body: unknown; storedAt: number };
+const IDEM_TTL_MS = 24 * 60 * 60 * 1000;
+const idemStore = new Map<string, IdemEntry>();
+
+export function getIdempotentResult(key: string | null): Response | null {
+  if (!key) return null;
+  const hit = idemStore.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.storedAt > IDEM_TTL_MS) {
+    idemStore.delete(key);
+    return null;
+  }
+  return Response.json(hit.body, {
+    status: hit.status,
+    headers: { "Idempotent-Replay": "true", "Idempotency-Key": key },
+  });
+}
+
+export function storeIdempotentResult(key: string | null, status: number, body: unknown): void {
+  if (!key) return;
+  idemStore.set(key, { status, body, storedAt: Date.now() });
+}
+
+export function idempotencyKeyFrom(req: Request): string | null {
+  return req.headers.get("idempotency-key");
+}

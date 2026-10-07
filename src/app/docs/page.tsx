@@ -13,10 +13,13 @@ export const metadata: Metadata = {
 
 const endpoints = [
   { m: "GET", p: "/api/profile", d: "Public profile, roles, availability. No auth." },
-  { m: "GET", p: "/api/projects?type=client&q=next", d: "Filter work by kind and text." },
+  { m: "GET", p: "/api/projects?type=client&q=next&limit=10", d: "Filter work by kind and text. Cursor pagination: limit (1-50), cursor, next_cursor, has_more." },
   { m: "GET", p: "/api/experience", d: "Experience, hackathons, skills, education." },
   { m: "GET", p: "/api/contact", d: "Public contact channels." },
-  { m: "POST", p: "/api/contact", d: "{name,email,message} validation, 202 on success." },
+  { m: "POST", p: "/api/contact", d: "{name,email,message} validation → 202 + job_id + Location header. Idempotency-Key supported." },
+  { m: "GET", p: "/api/jobs/{id}", d: "Poll async job until status=completed." },
+  { m: "POST", p: "/api/batch", d: "Up to 20 allowlisted GET reads in one request. Idempotency-Key supported." },
+  { m: "POST", p: "/api/agent/key", d: "Self-serve demo API key (free tier; reads are keyless)." },
   { m: "GET", p: "/api/health", d: "Status + endpoint index." },
   { m: "GET", p: "/api/sandbox", d: "Sandbox/test environment description." },
   { m: "POST", p: "/ask", d: 'NLWeb natural-language ask: {q:"What did Hormaz ship?"}' },
@@ -63,6 +66,32 @@ curl -X POST https://hormazdaruwala.vercel.app/ask \\
   -H 'Content-Type: application/json' \\
   -d '{"q":"What Web3 work has Hormaz shipped?"}'`}
       </pre>
+      <h2 className="mt-10 text-2xl font-bold">Versioning & deprecation</h2>
+      <p className="mt-3 leading-relaxed text-white/60">
+        URL-path versioning: <code>/api/*</code> is v1 (current) and is
+        mirrored at <code>/api/v1/*</code> with a{" "}
+        <code>{`{version:"v1"}`}</code> envelope. Every API response
+        carries <code>API-Version: v1</code> and{" "}
+        <code>Deprecation: false</code> headers. Breaking changes ship as
+        a new path version with a 12-month <code>Sunset</code> notice.
+        Rate limits (60 req/min demo) are advertised via{" "}
+        <code>RateLimit-Limit/Remaining/Reset</code> headers, with{" "}
+        <code>Retry-After</code> on 429.
+      </p>
+      <h2 className="mt-10 text-2xl font-bold">Idempotency, pagination, async</h2>
+      <p className="mt-3 leading-relaxed text-white/60">
+        POST writes (<code>/api/contact</code>, <code>/api/batch</code>,{" "}
+        <code>/api/agent/claim</code>, <code>/api/agent/key</code>,{" "}
+        <code>/ask</code>) accept an <code>Idempotency-Key</code> header;
+        replays return the original response with{" "}
+        <code>Idempotent-Replay: true</code>. List endpoints use cursor
+        pagination (<code>limit</code>, <code>cursor</code> →{" "}
+        <code>next_cursor</code>, <code>has_more</code>). Long work is
+        async: <code>POST /api/contact</code> returns{" "}
+        <code>202 + job_id</code> with a <code>Location</code> header —
+        poll <code>GET /api/jobs/{"{id}"}</code> until{" "}
+        <code>status=completed</code>.
+      </p>
       <h2 className="mt-10 text-2xl font-bold">Errors</h2>
       <p className="mt-3 leading-relaxed text-white/60">
         Errors always return JSON:{" "}

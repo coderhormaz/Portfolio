@@ -1,4 +1,4 @@
-import { jsonError } from "@/lib/agent-auth";
+import { getIdempotentResult, idempotencyKeyFrom, jsonError, storeIdempotentResult } from "@/lib/agent-auth";
 
 export async function GET() {
   return Response.json({
@@ -10,6 +10,10 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const idemKey = idempotencyKeyFrom(req);
+  const replay = getIdempotentResult(idemKey);
+  if (replay) return replay;
+
   let body: unknown;
   try {
     body = await req.json();
@@ -42,12 +46,14 @@ export async function POST(req: Request) {
       422,
     );
   }
-  return Response.json({
+  const resBody = {
     access_token: "demo-token-claimed",
     token_type: "Bearer",
     expires_in: 3600,
     identity_type,
-  });
+  };
+  storeIdempotentResult(idemKey, 200, resBody);
+  return Response.json(resBody);
 }
 
 export async function OPTIONS() {

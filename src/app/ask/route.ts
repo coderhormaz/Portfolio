@@ -60,6 +60,11 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const { getIdempotentResult, idempotencyKeyFrom, storeIdempotentResult } = await import("@/lib/agent-auth");
+  const idemKey = idempotencyKeyFrom(req);
+  const replay = getIdempotentResult(idemKey);
+  if (replay) return replay;
+
   let body: { q?: string; query?: string; "prefer.streaming"?: boolean; prefer?: { streaming?: boolean } } = {};
   try {
     body = await req.json();
@@ -68,7 +73,13 @@ export async function POST(req: Request) {
   }
   const q = body.q || body.query || "";
   const streaming = Boolean(body["prefer.streaming"] || body.prefer?.streaming);
-  return handleAsk(q, streaming);
+  if (streaming) return handleAsk(q, true);
+  const res = await handleAsk(q, false);
+  if (idemKey) {
+    const data = await res.clone().json().catch(() => null);
+    storeIdempotentResult(idemKey, 200, data);
+  }
+  return res;
 }
 
 export async function OPTIONS() {

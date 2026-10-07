@@ -1,4 +1,14 @@
-export const HOME_MARKDOWN = `# Hormaz Daruwala — Full-Stack, Web3 & Design Engineer
+export const LAST_UPDATED = "2026-10-07";
+
+export function fm(title: string, description: string, canonical: string): string {
+  return `---\ntitle: "${title}"\ndescription: "${description}"\ncanonical: "${canonical}"\nlast-updated: "${LAST_UPDATED}"\n---\n`;
+}
+
+export const HOME_MARKDOWN = fm(
+  "Hormaz Daruwala — Full-Stack, Web3 & Design Engineer",
+  "Mumbai full-stack developer: Next.js platforms, Web3 apps, mobile products. Agent index with API, MCP, and contact paths.",
+  "https://hormazdaruwala.vercel.app/",
+) + `# Hormaz Daruwala — Full-Stack, Web3 & Design Engineer
 
 Mumbai full-stack developer building Next.js platforms, Web3 apps and mobile products. 5+ years, 15+ hackathons, open for freelance.
 
@@ -43,10 +53,14 @@ export const LLMS_TXT = `# Hormaz Daruwala — hormazdaruwala.vercel.app
 - [GET /api/profile](https://hormazdaruwala.vercel.app/api/profile): identity, roles, availability.
 - [GET /api/projects](https://hormazdaruwala.vercel.app/api/projects): filter with ?type=client|personal&q=.
 - [GET /api/experience](https://hormazdaruwala.vercel.app/api/experience): work, hackathons, skills.
-- [POST /api/contact](https://hormazdaruwala.vercel.app/api/contact): validate {name,email,message}.
-- [GET /api/sandbox](https://hormazdaruwala.vercel.app/api/sandbox): test environment.
-- [POST /api/mcp](https://hormazdaruwala.vercel.app/api/mcp): MCP tools get_profile, list_projects, get_contact.
+- [POST /api/contact](https://hormazdaruwala.vercel.app/api/contact): validate {name,email,message} → 202 + job_id (poll /api/jobs/{id}); Idempotency-Key supported.
+- [POST /api/batch](https://hormazdaruwala.vercel.app/api/batch): bulk reads (up to 20 ops, Idempotency-Key).
+- [POST /api/agent/key](https://hormazdaruwala.vercel.app/api/agent/key): self-serve demo key (free tier; reads are keyless).
+- [GET /api/sandbox](https://hormazdaruwala.vercel.app/api/sandbox): test environment · [guide](https://hormazdaruwala.vercel.app/sandbox).
+- [POST /api/mcp](https://hormazdaruwala.vercel.app/api/mcp): product MCP tools get_profile, list_projects, get_contact, ask_about_docs.
+- [POST /api/docs-mcp](https://hormazdaruwala.vercel.app/api/docs-mcp): docs MCP tools ask_about_docs, get_llms, get_openapi.
 - [POST /ask](https://hormazdaruwala.vercel.app/ask): NLWeb natural-language queries.
+- Versioning: /api/* is v1 (mirrored at /api/v1/*); API-Version + Deprecation headers on every response; pagination via limit/cursor.
 
 ## Discovery
 - [Agent card](https://hormazdaruwala.vercel.app/.well-known/agent-card.json) (A2A)
@@ -78,9 +92,10 @@ Hormaz Daruwala, Mumbai, India. Full-stack developer, UI/UX designer, Web3 & blo
 - See /api/projects and /api/experience for the queryable record.
 
 ## Integration
-- REST: /api/profile, /api/projects, /api/experience, /api/contact, /api/health, /api/sandbox. JSON errors {code,message,hint,docs}.
-- OpenAPI: /openapi.json (operationId + description on every operation, typed params, response schemas).
-- MCP: /api/mcp (Streamable HTTP, tools/get_profile/list_projects/get_contact). Discovery: /.well-known/mcp + server-card.json.
+- REST: /api/profile, /api/projects (limit/cursor pagination), /api/experience, /api/contact (202 + job_id, Idempotency-Key), /api/batch, /api/jobs/{id}, /api/health, /api/sandbox. JSON errors {code,message,hint,docs}; unknown paths + bad methods return JSON 404/405.
+- OpenAPI: /openapi.json (operationId + description on every operation, typed params, typed response schemas).
+- Versioning: /api/* v1 current, /api/v1/* mirror; API-Version + Deprecation headers; 12-month Sunset policy in /docs.
+- MCP product: /api/mcp (get_profile, list_projects, get_contact, ask_about_docs; readOnlyHint annotations, typed inputSchemas, initialize instructions). MCP docs: /api/docs-mcp. Discovery: /.well-known/mcp + server cards.
 - NLWeb: POST /ask {q} → {_meta, results}; SSE with prefer.streaming.
 - Auth: /auth.md (anonymous, identity_assertion/ID-JAG, service_auth). PRM: /.well-known/oauth-protected-resource. AS: /.well-known/oauth-authorization-server.
 - Sandbox: /api/sandbox (read-only, no side effects, 60 req/min demo).
@@ -89,7 +104,11 @@ Hormaz Daruwala, Mumbai, India. Full-stack developer, UI/UX designer, Web3 & blo
 - Source: https://github.com/coderhormaz/Portfolio (AGENTS.md, plugin.json skill manifest).
 `;
 
-export const AUTH_MD = `# Auth — Hormaz Daruwala Portfolio Agents
+export const AUTH_MD = fm(
+  "Auth — Hormaz Daruwala Portfolio Agents",
+  "How AI agents obtain credentials: anonymous, identity_assertion (ID-JAG), service_auth. Endpoints, errors, revocation.",
+  "https://hormazdaruwala.vercel.app/auth.md",
+) + `# Auth — Hormaz Daruwala Portfolio Agents
 
 How agents obtain credentials for hormazdaruwala.vercel.app. Spec keywords: agent_auth, identity_endpoint, identity_assertion, service_auth, id-jag, WWW-Authenticate.
 
@@ -123,7 +142,11 @@ JSON {error:{code,message,hint,docs}}. Codes: invalid_json, invalid_assertion, u
 POST /api/agent/events {"event":"revoke","token":"..."} or email hormazdaruwala86@gmail.com. Demo tokens expire in 1h.
 `;
 
-export const PRICING_MD = `# Pricing — Hormaz Daruwala
+export const PRICING_MD = fm(
+  "Pricing — Hormaz Daruwala",
+  "Freelance pricing tiers, terms, and limits in machine-readable markdown.",
+  "https://hormazdaruwala.vercel.app/pricing.md",
+) + `# Pricing — Hormaz Daruwala
 
 Freelance pricing for Hormaz Daruwala (Mumbai, worldwide remote). Quotes in USD. Email hormazdaruwala86@gmail.com with scope/budget/timeline; reply within 24h.
 
@@ -142,11 +165,58 @@ Freelance pricing for Hormaz Daruwala (Mumbai, worldwide remote). Quotes in USD.
 
 export function markdownFor(path: string): string | null {
   if (path === "/" || path === "/index.md" || path === "/llms.md") return HOME_MARKDOWN;
-  if (path === "/docs" || path === "/docs.md") return `# Docs — Hormaz Daruwala\n\nAPI documentation for hormazdaruwala.vercel.app. Start at /llms.txt, then /openapi.json, /developers, /auth.md.\n\n## Endpoints\n- GET /api/profile — identity\n- GET /api/projects — filtered work\n- GET /api/experience — history\n- POST /api/contact — validate inquiry\n- POST /ask — natural language\n- POST /api/mcp — MCP tools\n\nFull docs: https://hormazdaruwala.vercel.app/docs\n`;
-  if (path === "/developers" || path === "/developers.md") return `# Developers — Hormaz Daruwala\n\nPortal quickstart: GET /api/profile, GET /api/projects, read /openapi.json, try /api/sandbox, then /auth.md + /api/mcp.\n\nResources: /docs, /openapi.json, /auth.md, /.well-known/agent-card.json, https://github.com/coderhormaz/Portfolio\n`;
+  if (path === "/auth.md") return AUTH_MD;
+  if (path === "/pricing.md") return PRICING_MD;
+  if (path === "/docs" || path === "/docs.md")
+    return fm("Docs — Hormaz Daruwala", "API documentation: endpoints, auth, errors, examples.", "https://hormazdaruwala.vercel.app/docs.md") +
+      `# Docs — Hormaz Daruwala\n\nAPI documentation for hormazdaruwala.vercel.app. Start at /llms.txt, then /openapi.json, /developers, /auth.md.\n\n## Endpoints\n- GET /api/profile — identity\n- GET /api/projects — filtered work (limit/cursor pagination)\n- GET /api/experience — history\n- POST /api/contact — validate inquiry (202 + job_id, Idempotency-Key supported)\n- POST /api/batch — bulk operations\n- POST /ask — natural language\n- POST /api/mcp — product MCP tools; POST /api/docs-mcp — docs MCP tools\n\nFull docs: https://hormazdaruwala.vercel.app/docs\n`;
+  if (path === "/developers" || path === "/developers.md")
+    return fm("Developers — Hormaz Daruwala", "Developer portal quickstart, sandbox, versioning, keys.", "https://hormazdaruwala.vercel.app/developers.md") +
+      `# Developers — Hormaz Daruwala\n\nPortal quickstart: GET /api/profile, GET /api/projects, read /openapi.json, try /api/sandbox, then /auth.md + /api/mcp.\n\nResources: /docs, /openapi.json, /auth.md, /.well-known/agent-card.json, https://github.com/coderhormaz/Portfolio\n`;
   if (path === "/pricing" || path === "/pricing.md") return PRICING_MD;
-  if (path === "/about" || path === "/about.md") return `# About — Hormaz Daruwala\n\nMumbai full-stack/Web3/mobile engineer, 5+ years production. AISkool auth/RBAC + zero-loss Postgres migration; Techshala 10-module platform; ETH Mumbai bounty (USDC/x402 on Base); 15+ hackathons. Open freelance/full-time, replies <24h: hormazdaruwala86@gmail.com.\n`;
-  if (path === "/contact" || path === "/contact.md") return `# Contact — Hormaz Daruwala\n\nEmail hormazdaruwala86@gmail.com (replies <24h). Mumbai, worldwide remote. Include scope/budget/timeline. Form: /#contact. Agents: POST /api/contact {name,email,message}.\n`;
-  if (path === "/privacy" || path === "/privacy.md") return `# Privacy — Hormaz Daruwala\n\nContact inquiries used only to respond; never sold. Minimal server logs for security. Read-only public API, no accounts. Deletion: email hormazdaruwala86@gmail.com.\n`;
+  if (path === "/about" || path === "/about.md")
+    return fm("About — Hormaz Daruwala", "Mumbai full-stack/Web3/mobile engineer profile.", "https://hormazdaruwala.vercel.app/about.md") +
+      `# About — Hormaz Daruwala\n\nMumbai full-stack/Web3/mobile engineer, 5+ years production. AISkool auth/RBAC + zero-loss Postgres migration; Techshala 10-module platform; ETH Mumbai bounty (USDC/x402 on Base); 15+ hackathons. Open freelance/full-time, replies <24h: hormazdaruwala86@gmail.com.\n`;
+  if (path === "/contact" || path === "/contact.md")
+    return fm("Contact — Hormaz Daruwala", "Hiring contact channels and inquiry validation.", "https://hormazdaruwala.vercel.app/contact.md") +
+      `# Contact — Hormaz Daruwala\n\nEmail hormazdaruwala86@gmail.com (replies <24h). Mumbai, worldwide remote. Include scope/budget/timeline. Form: /#contact. Agents: POST /api/contact {name,email,message}.\n`;
+  if (path === "/privacy" || path === "/privacy.md")
+    return fm("Privacy — Hormaz Daruwala", "Privacy policy: data use, retention, deletion.", "https://hormazdaruwala.vercel.app/privacy.md") +
+      `# Privacy — Hormaz Daruwala\n\nContact inquiries used only to respond; never sold. Minimal server logs for security. Read-only public API, no accounts. Deletion: email hormazdaruwala86@gmail.com.\n`;
+  if (path === "/sandbox" || path === "/sandbox.md")
+    return fm("Sandbox — Hormaz Daruwala", "Sandbox/test environment: safe endpoints and try-it guide.", "https://hormazdaruwala.vercel.app/sandbox.md") +
+      `# Sandbox — Hormaz Daruwala\n\nSafe test surface: GET /api/sandbox describes the sandbox; POST /api/contact validates without sending email (202 + job_id); GET /api/jobs/{id} polls the job; POST /api/batch runs bulk reads. Rate limit 60 req/min demo. Full guide: https://hormazdaruwala.vercel.app/sandbox\n`;
   return null;
+}
+
+/** Generic markdown twin for any other path (API endpoints, well-known docs, ...). Always 200 + frontmatter. */
+export function genericMarkdownFor(path: string): string {
+  const base = path.replace(/\.md$/, "") || "/";
+  const apiDocs: Record<string, { title: string; description: string }> = {
+    "/api/profile": { title: "GET /api/profile", description: "Public profile, roles, availability. No auth." },
+    "/api/projects": { title: "GET /api/projects", description: "Filter work by type and keyword. limit/cursor pagination." },
+    "/api/experience": { title: "GET /api/experience", description: "Work history, hackathons, skills, education." },
+    "/api/contact": { title: "POST /api/contact", description: "Validate {name,email,message}. 202 + job_id. Idempotency-Key supported." },
+    "/api/health": { title: "GET /api/health", description: "Status and endpoint index." },
+    "/api/sandbox": { title: "GET /api/sandbox", description: "Sandbox/test environment description." },
+    "/api/batch": { title: "POST /api/batch", description: "Bulk read operations in one request." },
+    "/api/mcp": { title: "POST /api/mcp", description: "Product MCP: get_profile, list_projects, get_contact, ask_about_docs." },
+    "/api/docs-mcp": { title: "POST /api/docs-mcp", description: "Docs MCP: ask_about_docs, get_llms, get_openapi." },
+    "/ask": { title: "POST /ask", description: "NLWeb natural-language ask with SSE streaming." },
+    "/openapi.json": { title: "OpenAPI spec", description: "Typed REST schema with operationIds." },
+    "/.well-known/api-catalog": { title: "API catalog (RFC 9727)", description: "Linkset of service descriptions." },
+    "/.well-known/ard.json": { title: "ARD catalog", description: "Agentic Resource Discovery entries." },
+    "/.well-known/ai-catalog.json": { title: "AI catalog", description: "Agentic resource catalog entries." },
+    "/.well-known/agent-card.json": { title: "A2A agent card", description: "Agent capabilities and endpoints." },
+    "/.well-known/agent-skills/index.json": { title: "Agent skills index", description: "Skill-md capabilities with digests." },
+    "/.well-known/mcp": { title: "MCP discovery", description: "Product + docs MCP servers." },
+    "/.well-known/mcp/server-card.json": { title: "MCP server card", description: "Product MCP identity and transports." },
+  };
+  const known = apiDocs[base] || apiDocs[path];
+  const title = known ? known.title : `Resource ${base}`;
+  const description = known
+    ? known.description
+    : `Machine-readable twin for ${base} on hormazdaruwala.vercel.app.`;
+  return fm(title, description, `https://hormazdaruwala.vercel.app${path}`) +
+    `# ${title}\n\n${description}\n\n- Agent index: https://hormazdaruwala.vercel.app/llms.txt\n- Docs: https://hormazdaruwala.vercel.app/docs\n- OpenAPI: https://hormazdaruwala.vercel.app/openapi.json\n`;
 }

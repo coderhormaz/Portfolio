@@ -16,6 +16,12 @@ export async function GET() {
         transport: "streamable-http",
         card: `${SITE_URL}/.well-known/mcp/server-card.json`,
       },
+      {
+        name: "portfolio-docs-mcp",
+        url: `${SITE_URL}/api/docs-mcp`,
+        transport: "streamable-http",
+        card: `${SITE_URL}/.well-known/mcp/docs-server-card.json`,
+      },
     ],
     docs_mcp: {
       name: "portfolio-docs-mcp",

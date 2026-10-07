@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/pricing",
     "/docs",
     "/developers",
+    "/sandbox",
   ];
   return [
     {
