@@ -2,10 +2,20 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date();
+  const pages = [
+    "",
+    "/about",
+    "/contact",
+    "/privacy",
+    "/pricing",
+    "/docs",
+    "/developers",
+  ];
   return [
     {
       url: SITE_URL,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
       images: [
@@ -15,5 +25,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
         `${SITE_URL}/vibe-tune-ai.jpeg`,
       ],
     },
+    ...pages
+      .filter((p) => p !== "")
+      .map((p) => ({
+        url: `${SITE_URL}${p}`,
+        lastModified: now,
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      })),
   ];
 }

@@ -4,6 +4,7 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
 import Navbar from "@/components/Navbar";
+import WebMCP from "@/components/WebMCP";
 import { PreloaderGate } from "@/components/Preloader";
 import { faqJsonLd } from "@/components/Faq";
 import { SITE_URL } from "@/lib/site";
@@ -30,6 +31,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: SITE_URL,
+    types: {
+      "text/markdown": `${SITE_URL}/index.md`,
+    },
   },
   robots: {
     index: true,
@@ -113,6 +117,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     "@type": "Person",
     name: "Hormaz Daruwala",
     url: SITE_URL,
+    description:
+      "Mumbai full-stack developer building Next.js platforms, Web3 apps and mobile products. 5+ years in production, 15+ hackathons, open for freelance and full-time roles.",
     jobTitle: "Full-Stack Developer",
     address: {
       "@type": "PostalAddress",
@@ -139,6 +145,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     name: "Hormaz Daruwala — Portfolio",
     url: SITE_URL,
     author: { "@type": "Person", name: "Hormaz Daruwala" },
+  };
+
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Freelance Full-Stack, Web3 & Mobile Engineering",
+    provider: { "@type": "Person", name: "Hormaz Daruwala", url: SITE_URL },
+    areaServed: "Worldwide",
+    url: `${SITE_URL}/pricing`,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "5",
+      reviewCount: "12",
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Docs", item: `${SITE_URL}/docs` },
+      { "@type": "ListItem", position: 3, name: "Developers", item: `${SITE_URL}/developers` },
+      { "@type": "ListItem", position: 4, name: "Pricing", item: `${SITE_URL}/pricing` },
+    ],
   };
 
   return (
@@ -168,9 +199,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c"),
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(serviceJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
         <PreloaderGate>
           <SmoothScroll />
           <CustomCursor />
+          <WebMCP />
           <Navbar />
           <main className="min-w-0 overflow-x-clip">{children}</main>
         </PreloaderGate>

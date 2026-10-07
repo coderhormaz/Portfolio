@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async headers() {
+    const link =
+      '</sitemap.xml>; rel="sitemap", </index.md>; rel="alternate"; type="text/markdown", <https://hormazdaruwala.vercel.app/openapi.json>; rel="service-desc", <https://hormazdaruwala.vercel.app/.well-known/api-catalog>; rel="service-desc"';
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Link", value: link },
+          { key: "Vary", value: "Accept" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

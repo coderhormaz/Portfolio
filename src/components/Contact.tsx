@@ -292,6 +292,14 @@ export default function Contact() {
               <p className="min-w-0 text-sm text-white/60">© 2026 Hormaz Daruwala · Mumbai · <span className="font-mono text-xs">{profile.portfolio}</span></p>
             </div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/30">Designed & engineered with obsession</p>
+            <nav aria-label="Developer resources" className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/40">
+              <a href="/docs" className="transition hover:text-white">API docs</a>
+              <a href="/developers" className="transition hover:text-white">Developers</a>
+              <a href="/pricing" className="transition hover:text-white">Pricing</a>
+              <a href="/openapi.json" className="transition hover:text-white">OpenAPI</a>
+              <a href="/llms.txt" className="transition hover:text-white">llms.txt</a>
+              <a href="https://github.com/coderhormaz/Portfolio" target="_blank" rel="noreferrer" className="transition hover:text-white">GitHub + AGENTS.md</a>
+            </nav>
             <a href="#top" className="group inline-flex w-fit items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm transition hover:border-[#ff4d00] hover:text-[#ff4d00]">
               Back to top <ArrowUp className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
             </a>
