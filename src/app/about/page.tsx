@@ -3,7 +3,7 @@ import { SITE_URL } from "@/lib/site";
 import { profile, education } from "@/data/portfolio";
 
 export const metadata: Metadata = {
-  title: "About — Hormaz Daruwala",
+  title: "About",
   description:
     "About Hormaz Daruwala: Mumbai full-stack, Web3, and mobile engineer with 5+ years production experience, hackathon wins, and live client launches.",
   alternates: {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "API Docs — Hormaz Daruwala",
+  title: "API Docs",
   description:
     "Hormaz Daruwala API documentation: authentication, endpoints, example requests, errors, sandbox, and MCP for hormazdaruwala.vercel.app.",
   alternates: {

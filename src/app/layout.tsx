@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | Hormaz Daruwala",
   },
   description:
-    "Mumbai full-stack developer building Next.js platforms, Web3 apps and mobile products. 5+ years, 15+ hackathons, open for freelance.",
+    "Hormaz Daruwala — Mumbai full-stack developer (Next.js, Web3, mobile). 5+ years shipping production platforms. Open for freelance.",
   keywords: [
     "Hormaz Daruwala",
     "Full Stack Developer Mumbai",
@@ -70,7 +70,11 @@ export const metadata: Metadata = {
     images: [`${SITE_URL}/og-image.jpg`],
   },
   icons: {
-    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
+    icon: [
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   manifest: "/site.webmanifest",
@@ -161,17 +165,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     },
   };
 
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Docs", item: `${SITE_URL}/docs` },
-      { "@type": "ListItem", position: 3, name: "Developers", item: `${SITE_URL}/developers` },
-      { "@type": "ListItem", position: 4, name: "Pricing", item: `${SITE_URL}/pricing` },
-    ],
-  };
-
   return (
     <html
       lang="en"
@@ -203,12 +196,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(serviceJsonLd).replace(/</g, "\\u003c"),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c"),
           }}
         />
         <PreloaderGate>

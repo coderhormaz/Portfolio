@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Pricing — Hormaz Daruwala",
+  title: "Pricing",
   description:
     "Hormaz Daruwala freelance pricing: landing pages, full-stack Next.js platforms, Web3 builds, mobile apps, and monthly retainers. Machine-readable pricing at /pricing.md.",
   alternates: {
@@ -35,6 +35,19 @@ export default function PricingPage() {
   return (
     <section className="mx-auto w-full max-w-4xl px-5 py-28 sm:px-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "Pricing", item: `${SITE_URL}/pricing` },
+            ],
+          }),
+        }}
+      />
       <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-[#ff4d00]">Pricing · Hormaz Daruwala</p>
       <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Freelance pricing</h1>
       <p className="mt-4 max-w-2xl leading-relaxed text-white/60">

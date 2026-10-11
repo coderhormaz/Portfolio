@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SITE_URL } from "@/lib/site";
 import { profile } from "@/data/portfolio";
 
 export const metadata: Metadata = {
-  title: "Contact — Hormaz Daruwala",
+  title: "Contact",
   description:
     "Contact Hormaz Daruwala for freelance or full-time work: email, location, availability, and project inquiry details. Replies within 24 hours.",
   alternates: {
@@ -15,6 +16,19 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <section className="mx-auto w-full max-w-3xl px-5 py-28 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "Contact", item: `${SITE_URL}/contact` },
+            ],
+          }),
+        }}
+      />
       <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-[#ff4d00]">Contact · Hormaz Daruwala</p>
       <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Contact</h1>
       <p className="mt-4 leading-relaxed text-white/60">
@@ -35,7 +49,7 @@ export default function ContactPage() {
         <li>Location: {profile.location} (worldwide remote)</li>
         <li>GitHub: <a className="underline" href={profile.github}>{profile.github}</a></li>
         <li>LinkedIn: <a className="underline" href={profile.linkedin}>{profile.linkedin}</a></li>
-        <li>API: <a className="underline" href="/api/contact">/api/contact</a></li>
+        <li>API: <Link className="underline" href="/api/contact">/api/contact</Link></li>
       </ul>
     </section>
   );

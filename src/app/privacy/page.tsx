@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Privacy — Hormaz Daruwala",
+  title: "Privacy",
   description:
     "Privacy policy for hormazdaruwala.vercel.app: what data is collected, how contact inquiries are used, cookies, analytics, and contact details.",
   alternates: {

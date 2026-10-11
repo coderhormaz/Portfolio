@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Sandbox — Hormaz Daruwala",
+  title: "Sandbox",
   description:
     "Hormaz Daruwala API sandbox: safe test endpoints, try-it examples, rate limits, and how to exercise the API without side effects.",
   alternates: {
@@ -28,7 +29,7 @@ export default function SandboxPage() {
         (readOnlyHint). Nothing here sends email or mutates data, so
         agents can exercise the full surface without touching production.
         Machine-readable sandbox description lives at{" "}
-        <a className="underline" href="/api/sandbox">GET /api/sandbox</a>{" "}
+        <Link className="underline" href="/api/sandbox">GET /api/sandbox</Link>{" "}
         and the markdown twin at <a className="underline" href="/sandbox.md">/sandbox.md</a>.
       </p>
       <h2 className="mt-10 text-2xl font-bold">Try it</h2>

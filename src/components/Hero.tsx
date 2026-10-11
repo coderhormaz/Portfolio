@@ -140,7 +140,7 @@ export default function Hero() {
                   transition={{ duration: 0.9, delay: 0.1, ease: [...EASE] }}
                   className="block"
                 >
-                  I build <span className="font-serif-accent font-normal text-[#ff4d00]">production</span> web
+                  <span className="sr-only">Hormaz Daruwala — </span>I build <span className="font-serif-accent font-normal text-[#ff4d00]">production</span> web
                 </motion.span>
               </span>
               <span className="block overflow-hidden pb-2">

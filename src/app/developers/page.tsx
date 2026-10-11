@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Developers — Hormaz Daruwala",
+  title: "Developers",
   description:
     "Hormaz Daruwala developer portal: public REST API, OpenAPI spec, MCP server, quickstart, sandbox, and agent auth for hormazdaruwala.vercel.app.",
   alternates: {
@@ -52,7 +53,7 @@ export default function DevelopersPage() {
       <ul className="mt-3 list-disc space-y-2 pl-5 text-white/70">
         <li><a className="underline" href="/openapi.json">OpenAPI spec (/openapi.json)</a></li>
         <li><a className="underline" href="/docs">API docs (/docs)</a></li>
-        <li><a className="underline" href="/api/sandbox">Sandbox (/api/sandbox)</a></li>
+        <li><Link className="underline" href="/api/sandbox">Sandbox (/api/sandbox)</Link></li>
         <li><a className="underline" href="/auth.md">Agent auth walkthrough (/auth.md)</a></li>
         <li><a className="underline" href="/.well-known/agent-card.json">A2A agent card</a></li>
         <li><a className="underline" href="/.well-known/mcp/server-card.json">MCP server card</a></li>
