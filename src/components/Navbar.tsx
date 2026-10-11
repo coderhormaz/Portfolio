@@ -6,36 +6,29 @@ import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { navLinks, profile } from "@/data/portfolio";
 
-/** Last section whose top has passed the header line = the one you're reading. */
+/** Active section via IntersectionObserver: no layout reads on scroll,
+    so it never forces reflows. The middle band picks one section at a time. */
 function useActiveSection() {
   const [active, setActive] = useState("");
   useEffect(() => {
-    let raf = 0;
-    const measure = () => {
-      const line = 160;
-      let current = "";
-      for (const l of navLinks) {
-        const el = document.querySelector(l.href);
-        if (el && el.getBoundingClientRect().top <= line) current = l.href;
-      }
-      // near the very bottom the last section may never cross the line
-      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 80) {
-        current = navLinks[navLinks.length - 1].href;
-      }
-      setActive(current);
-    };
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(measure);
-    };
-    measure();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
+    const sections = navLinks
+      .map((l) => document.querySelector(l.href))
+      .filter((el): el is Element => !!el);
+    if (!sections.length || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(`#${e.target.id}`);
+        });
+        // near the very bottom the last section may never enter the band
+        if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 80) {
+          setActive(navLinks[navLinks.length - 1].href);
+        }
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+    );
+    sections.forEach((s) => io.observe(s));
+    return () => io.disconnect();
   }, []);
   return active;
 }
@@ -106,7 +99,7 @@ export default function Navbar() {
         <div className="mx-auto flex w-full max-w-[1440px] min-w-0 items-center justify-between gap-2 px-4 pt-3 sm:px-6 sm:pt-4 lg:px-8">
           <a
             href="#top"
-            aria-label="Back to top"
+            aria-label="HORMAZ® ©2026 — back to top"
             className={`flex min-w-0 items-center gap-2 rounded-full py-2 pl-2.5 pr-4 sm:py-2.5 sm:pl-4 sm:pr-5 transition-all duration-500 ${
               scrolled ? "bg-[#ece8de] text-[#131313] shadow-xl" : "bg-white/[0.04] text-[#ece8de] backdrop-blur-xl border border-white/10"
             }`}
@@ -176,7 +169,7 @@ export default function Navbar() {
               href="#contact"
               tabIndex={open ? -1 : undefined}
               aria-hidden={open}
-              className={`group hidden min-[400px]:inline-flex items-center gap-1.5 rounded-full bg-[#ff4d00] px-4 sm:px-5 py-2.5 sm:py-3 text-[13px] font-bold text-white transition-all duration-300 hover:bg-[#ece8de] hover:text-black ${
+              className={`group hidden min-[400px]:inline-flex items-center gap-1.5 rounded-full bg-[#ff4d00] px-4 sm:px-5 py-2.5 sm:py-3 text-[13px] font-bold text-black transition-all duration-300 hover:bg-[#ece8de] hover:text-black ${
                 open ? "pointer-events-none -translate-y-1 opacity-0" : "opacity-100"
               }`}
             >
@@ -235,7 +228,7 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.28, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="mt-4 block break-all rounded-2xl bg-[#ff4d00] p-4 text-center text-sm font-bold text-white"
+                className="mt-4 block break-all rounded-2xl bg-[#ff4d00] p-4 text-center text-sm font-bold text-black"
               >
                 {profile.email}
               </motion.a>

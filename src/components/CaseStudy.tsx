@@ -160,7 +160,7 @@ export default function CaseStudy({
                 <div className="relative border-b border-white/10 bg-[#08080b]">
                   <Media p={p} i={index} />
                   {p.award === "bounty" && (
-                    <span className="absolute left-3 top-3 rounded-full bg-[#ff4d00] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg sm:left-4 sm:top-4">
+                    <span className="absolute left-3 top-3 rounded-full bg-[#ff4d00] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-black shadow-lg sm:left-4 sm:top-4">
                       Bounty win
                     </span>
                   )}
@@ -169,7 +169,7 @@ export default function CaseStudy({
                 {/* body */}
                 <div className="p-5 sm:p-8">
                   <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:text-[11px]">
-                    <span className="rounded-full bg-[#ff4d00] px-3 py-1 font-bold text-white">
+                    <span className="rounded-full bg-[#ff4d00] px-3 py-1 font-bold text-black">
                       {p.subtitle}
                     </span>
                     {p.year && <span className="text-white/40">{p.year}</span>}

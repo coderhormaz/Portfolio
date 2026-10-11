@@ -23,16 +23,16 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
     }
     const id = setInterval(() => {
       setN((v) => {
-        const next = v + Math.floor(Math.random() * 9) + 7;
+        const next = v + Math.floor(Math.random() * 12) + 14;
         if (next >= 100) {
           clearInterval(id);
-          setTimeout(finish, 250);
+          setTimeout(finish, 150);
           return 100;
         }
         return next;
       });
-    }, 65);
-    const failsafe = setTimeout(finish, 2600);
+    }, 50);
+    const failsafe = setTimeout(finish, 2200);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") finish();
     };
@@ -48,7 +48,7 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
     <motion.div
       className="fixed inset-0 z-[200] flex cursor-pointer flex-col overflow-hidden bg-[#0a0a0c] px-5 sm:px-8 py-5 sm:py-6"
       exit={{ y: "-100%" }}
-      transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
+      transition={{ duration: 0.65, ease: [0.76, 0, 0.24, 1] }}
       onClick={finish}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") finish();

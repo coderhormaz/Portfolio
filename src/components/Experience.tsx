@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { experiences } from "@/data/portfolio";
 import { Reveal, SectionHead } from "./ui";
 
@@ -14,21 +14,41 @@ export default function Experience() {
   const scaleY = useSpring(scrollYProgress, { stiffness: 90, damping: 25 });
   const [lit, setLit] = useState(1);
 
-  /* Dots ignite the moment the fill tip passes them. Measured with
-     getBoundingClientRect (offsetTop lies here — Reveal's motion wrapper
-     hijacks offsetParent), so uneven cards stay exact on every viewport. */
+  /* Dot geometry is cached (measure on mount/resize/settle) so the scroll
+     handler never reads layout — zero forced reflows while scrolling. */
+  const dotsY = useRef<number[]>([]);
+  const listH = useRef(1);
+  useEffect(() => {
+    const measure = () => {
+      const list = listRef.current;
+      if (!list) return;
+      const base = list.getBoundingClientRect().top + window.scrollY;
+      listH.current = list.offsetHeight || 1;
+      const dotCenter = (window.innerWidth >= 640 ? 38 : 34) + 6;
+      dotsY.current = rowRefs.current.map((row) => {
+        if (!row) return Infinity;
+        return row.getBoundingClientRect().top + window.scrollY - base + dotCenter;
+      });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    const t1 = setTimeout(measure, 900);
+    const t2 = setTimeout(measure, 2500);
+    return () => {
+      window.removeEventListener("resize", measure);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
+  /* Dots ignite the moment the fill tip passes their cached position. */
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     if (reduce) return;
-    const list = listRef.current;
-    if (!list) return;
-    const listTop = list.getBoundingClientRect().top;
-    const tip = v * list.offsetHeight;
-    const dotCenter = (window.innerWidth >= 640 ? 38 : 34) + 6;
+    const tip = v * listH.current;
+    const ys = dotsY.current;
     let n = 1;
-    for (let i = 0; i < rowRefs.current.length; i++) {
-      const row = rowRefs.current[i];
-      if (!row) continue;
-      if (row.getBoundingClientRect().top - listTop + dotCenter <= tip + 4) n = i + 1;
+    for (let i = 0; i < ys.length; i++) {
+      if (ys[i] <= tip + 4) n = i + 1;
       else break;
     }
     setLit((prev) => (prev === n ? prev : n));
@@ -105,7 +125,7 @@ export default function Experience() {
                     </div>
                   <article className="ringline group relative min-w-0 rounded-[1.25rem] sm:rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-5 sm:p-7 lg:p-9 backdrop-blur transition hover:bg-white/[0.05]" data-hover>
                     <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.2em]">
-                      <span className="rounded-full bg-[#ff4d00] px-3 py-1 font-bold text-white">{exp.period}</span>
+                      <span className="rounded-full bg-[#ff4d00] px-3 py-1 font-bold text-black">{exp.period}</span>
                       <span className="text-white/40">{exp.orgDetail}</span>
                     </div>
                     <h3 className="font-display mt-3 sm:mt-4 text-xl sm:text-2xl lg:text-[1.9rem] font-bold leading-tight tracking-tight text-balance">
@@ -113,8 +133,8 @@ export default function Experience() {
                     </h3>
                     <ul className="mt-4 sm:mt-5 space-y-2.5">
                       {exp.points.map((p) => (
-                        <li key={p.slice(0, 24)} className="flex gap-3 text-[13.5px] sm:text-[14.5px] leading-relaxed text-white/60">
-                          <span className="mt-2 h-1 w-3 sm:w-4 shrink-0 rounded-full bg-white/20 transition group-hover:bg-[#ff4d00]" />
+                        <li key={p.slice(0, 24)} className="flex gap-3 text-[13.5px] sm:text-[14.5px] leading-relaxed text-white/75">
+                          <span className="mt-2 h-1 w-3 sm:w-4 shrink-0 rounded-full bg-white/30 transition group-hover:bg-[#ff4d00]" />
                           <span className="min-w-0">{p}</span>
                         </li>
                       ))}

@@ -104,7 +104,7 @@ export default function Work() {
             <motion.div style={{ scaleX: smooth }} className="h-full w-full origin-left bg-[#ff4d00]" />
           </div>
           <span className="font-mono text-[11px] tracking-[0.2em] text-white/45 tabular-nums shrink-0">
-            {String(active + 1).padStart(2, "0")} <span className="text-white/25">/ {String(total).padStart(2, "0")}</span>
+            {String(active + 1).padStart(2, "0")} <span className="text-white/50">/ {String(total).padStart(2, "0")}</span>
           </span>
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function Work() {
                     href={p.link}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`Visit ${p.title}`}
+                    aria-label={`Visit site: ${p.title}`}
                     className="group/btn inline-flex w-fit items-center gap-2.5 rounded-full bg-[#131313] py-1.5 pl-1.5 pr-5 text-sm font-bold text-[#ece8de] transition hover:bg-[#ff4d00] hover:text-white"
                   >
                     <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ece8de] text-black transition group-hover/btn:rotate-45">

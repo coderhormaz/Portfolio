@@ -77,7 +77,32 @@ function BuildCard({
   onOpen: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const cardRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const poster = p.video ? posterFor({ video: p.video }) : undefined;
+
+  /* Mount heavy <video> only near the viewport. Until then a lazy poster
+     image stands in, so below-fold cards cost ~0 bytes on initial load. */
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || !p.video) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setMounted(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setMounted(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "500px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [p.video]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -92,6 +117,7 @@ function BuildCard({
   return (
     <motion.article
       layout
+      ref={cardRef}
       initial={{ opacity: 0, y: 24, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
@@ -103,16 +129,27 @@ function BuildCard({
     >
       {/* media: 21:9 matte matches screenshot ratio, contain-fit never crops */}
       <div className="relative aspect-[21/9] overflow-hidden border-b border-white/10 bg-[#0c0c0f]">
-        <Media
-          image={p.image}
-          video={p.video}
-          title={p.title}
-          index={index}
-          videoRef={videoRef}
-        />
+        {poster && !mounted ? (
+          <Image
+            src={poster}
+            alt={`${p.title} demo poster`}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading="lazy"
+            className="bg-[#0c0c0f] object-contain"
+          />
+        ) : (
+          <Media
+            image={p.image}
+            video={p.video}
+            title={p.title}
+            index={index}
+            videoRef={videoRef}
+          />
+        )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         {p.award === "bounty" && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-[#ff4d00] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-[#ff4d00] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-black shadow-lg">
             <Medal className="h-3 w-3" /> Bounty
           </span>
         )}
@@ -217,7 +254,7 @@ export default function Projects() {
               </button>
             ))}
           </div>
-          <span className="shrink-0 font-mono text-xs uppercase tracking-widest text-white/35">
+          <span className="shrink-0 font-mono text-xs uppercase tracking-widest text-white/60">
             {filtered.length} builds · click to open
           </span>
         </div>

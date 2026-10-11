@@ -116,7 +116,7 @@ export default function About() {
                       <p className="truncate font-semibold">{e.degree}</p>
                       <p className="truncate text-white/50">{e.school}</p>
                     </div>
-                    <span className="shrink-0 font-mono text-[11px] text-white/35">{e.period}</span>
+                    <span className="shrink-0 font-mono text-[11px] text-white/60">{e.period}</span>
                   </div>
                 ))}
                 <a

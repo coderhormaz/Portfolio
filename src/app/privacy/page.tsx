@@ -24,8 +24,12 @@ export default function PrivacyPage() {
         form-delivery provider that forwards your message to the site
         owner. Server logs (IP, user agent, requested path) may be
         retained briefly by the hosting provider for security and abuse
-        prevention. No advertising trackers are used; any privacy-friendly
-        analytics are aggregated and contain no cross-site identifiers.
+        prevention. Analytics uses Google Analytics 4 (a single site-wide
+        gtag.js tag): it sets first-party cookies to measure aggregated
+        page views, session duration, device type, and approximate region.
+        No advertising identifiers are used and data is not sold. You can
+        opt out with the Google Analytics opt-out add-on, your browser&apos;s
+        Do-Not-Track or cookie controls, or any content blocker.
       </p>
       <p className="mt-4 leading-relaxed text-white/60">
         The public API is read-only and requires no account; authenticated

@@ -143,7 +143,7 @@ function ContactForm() {
       <button
         type="submit"
         disabled={sending}
-        className="group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-8 py-4 font-bold text-white transition hover:bg-[#ece8de] hover:text-black disabled:cursor-wait disabled:opacity-70 sm:w-auto"
+        className="group mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-8 py-4 font-bold text-black transition hover:bg-[#ece8de] hover:text-black disabled:cursor-wait disabled:opacity-70 sm:w-auto"
       >
         {sending ? (
           <>
@@ -199,7 +199,7 @@ export default function Contact() {
           <Reveal delay={0.15}>
             <div className="mt-8 sm:mt-10 flex flex-col min-[420px]:flex-row flex-wrap items-stretch min-[420px]:items-center justify-center gap-2.5 sm:gap-3">
               <Magnetic strength={0.3}>
-                <a href={`mailto:${profile.email}`} className="inline-flex min-w-0 w-full min-[420px]:w-auto items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-6 sm:px-8 py-4 text-sm sm:text-base font-bold text-white transition hover:bg-[#ece8de] hover:text-black">
+                <a href={`mailto:${profile.email}`} className="inline-flex min-w-0 w-full min-[420px]:w-auto items-center justify-center gap-2 rounded-full bg-[#ff4d00] px-6 sm:px-8 py-4 text-sm sm:text-base font-bold text-black transition hover:bg-[#ece8de] hover:text-black">
                   <span className="truncate">Email me</span>
                   <ArrowUpRight className="h-4 w-4 shrink-0" />
                 </a>

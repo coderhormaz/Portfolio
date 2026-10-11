@@ -16,7 +16,6 @@ User-agent: PerplexityBot
 Allow: /
 
 Sitemap: ${SITE_URL}/sitemap.xml
-Schemamap: ${SITE_URL}/schemamap.xml
 `;
 
 export async function GET() {

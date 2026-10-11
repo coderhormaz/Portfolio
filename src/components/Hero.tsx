@@ -123,7 +123,7 @@ export default function Hero() {
             <motion.p
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.05, ease: [...EASE] }}
+              transition={{ duration: 0.7, delay: 0.02, ease: [...EASE] }}
               className="font-display text-[13px] font-bold uppercase tracking-[0.22em] text-white/70"
             >
               Hormaz Daruwala<span className="text-[#ff4d00]">®</span>
@@ -137,7 +137,7 @@ export default function Hero() {
                 <motion.span
                   initial={{ y: "110%" }}
                   animate={{ y: 0 }}
-                  transition={{ duration: 0.9, delay: 0.1, ease: [...EASE] }}
+                  transition={{ duration: 0.75, delay: 0.05, ease: [...EASE] }}
                   className="block"
                 >
                   <span className="sr-only">Hormaz Daruwala — </span>I build <span className="font-serif-accent font-normal text-[#ff4d00]">production</span> web
@@ -147,7 +147,7 @@ export default function Hero() {
                 <motion.span
                   initial={{ y: "110%" }}
                   animate={{ y: 0 }}
-                  transition={{ duration: 0.9, delay: 0.18, ease: [...EASE] }}
+                  transition={{ duration: 0.75, delay: 0.1, ease: [...EASE] }}
                   className="block text-[#ece8de]"
                 >
                   & Web3 products people <span className="font-serif-accent font-normal text-[#ff4d00]">love.</span>
@@ -158,7 +158,7 @@ export default function Hero() {
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.28, ease: [...EASE] }}
+              transition={{ duration: 0.7, delay: 0.08, ease: [...EASE] }}
               className="mt-3 max-w-xl text-[14px] leading-relaxed text-white/60 sm:mt-4 sm:text-[15px]"
             >
               5+ years building high-impact web apps, blockchain systems and mobile
@@ -169,7 +169,7 @@ export default function Hero() {
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.36, ease: [...EASE] }}
+              transition={{ duration: 0.7, delay: 0.14, ease: [...EASE] }}
               className="mt-5 flex flex-wrap items-center gap-2.5 sm:gap-3"
             >
               <Magnetic>
@@ -217,7 +217,7 @@ export default function Hero() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.9, delay: 0.48 }}
+              transition={{ duration: 0.7, delay: 0.32 }}
               className="mt-5 grid grid-cols-4 gap-2 border-t border-white/10 pt-4 sm:mt-6 sm:gap-3 sm:pt-5"
             >
               {stats.map((s) => (
@@ -238,7 +238,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 32, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 1, delay: 0.22, ease: [...EASE] }}
+            transition={{ duration: 0.85, delay: 0.12, ease: [...EASE] }}
             className="relative mx-auto hidden w-full max-w-[440px] [perspective:1400px] sm:block min-[1600px]:max-w-[520px]"
           >
             <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-[#ff4d00]/25 via-transparent to-[#6c5bff]/20 blur-2xl" />
@@ -290,7 +290,7 @@ export default function Hero() {
           href="#about"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.9, duration: 0.8 }}
+          transition={{ delay: 0.6, duration: 0.7 }}
           className="group mx-auto mt-5 hidden items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-white/35 transition hover:text-white/70 lg:inline-flex"
           aria-label="Scroll to about"
         >

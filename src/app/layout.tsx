@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Inter, Instrument_Serif, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -207,6 +208,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main id="main-content" className="min-w-0 overflow-x-clip">{children}</main>
         </PreloaderGate>
       </body>
+      {/* Analytics deferred to browser idle so measurement never competes
+          with load, interaction, or LCP. Same ID/behavior as gtag.js. */}
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-7L1Q3C3FYC"}`}
+        strategy="lazyOnload"
+      />
+      <Script id="ga-init" strategy="lazyOnload">
+        {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_ID || "G-7L1Q3C3FYC"}');`}
+      </Script>
     </html>
   );
 }

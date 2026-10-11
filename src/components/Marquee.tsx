@@ -19,8 +19,8 @@ export default function Marquee({ items, dark = false, fast = false }: { items: 
       <motion.div style={{ skewX: skew }} className={`flex w-max items-center gap-6 sm:gap-10 pr-6 sm:pr-10 ${fast ? "animate-marquee-fast" : "animate-marquee"}`}>
         {row.map((item, i) => (
           <span key={i} aria-hidden={i >= items.length} className="flex items-center gap-6 sm:gap-10 whitespace-nowrap">
-            <span className="font-display text-[13px] sm:text-sm lg:text-lg font-bold uppercase tracking-[0.15em]">{item}</span>
-            <span className={`font-serif-accent text-lg sm:text-xl lg:text-2xl ${dark ? "text-[#ff4d00]" : "text-white/70"}`}>✦</span>
+            <span className={`font-display text-[13px] sm:text-sm lg:text-lg font-bold uppercase tracking-[0.15em] ${dark ? "" : "text-black"}`}>{item}</span>
+            <span className={`font-serif-accent text-lg sm:text-xl lg:text-2xl ${dark ? "text-[#ff4d00]" : "text-black/60"}`}>✦</span>
           </span>
         ))}
       </motion.div>

@@ -182,7 +182,7 @@ export function markdownFor(path: string): string | null {
       `# Contact — Hormaz Daruwala\n\nEmail hormazdaruwala86@gmail.com (replies <24h). Mumbai, worldwide remote. Include scope/budget/timeline. Form: /#contact. Agents: POST /api/contact {name,email,message}.\n`;
   if (path === "/privacy" || path === "/privacy.md")
     return fm("Privacy — Hormaz Daruwala", "Privacy policy: data use, retention, deletion.", "https://hormazdaruwala.vercel.app/privacy.md") +
-      `# Privacy — Hormaz Daruwala\n\nContact inquiries used only to respond; never sold. Minimal server logs for security. Read-only public API, no accounts. Deletion: email hormazdaruwala86@gmail.com.\n`;
+      `# Privacy — Hormaz Daruwala\n\nContact inquiries used only to respond; never sold. Minimal server logs for security. Analytics: Google Analytics 4 (single gtag.js tag, first-party cookies, aggregated reporting; opt out via Google opt-out add-on or cookie controls). Read-only public API, no accounts. Deletion: email hormazdaruwala86@gmail.com.\n`;
   if (path === "/sandbox" || path === "/sandbox.md")
     return fm("Sandbox — Hormaz Daruwala", "Sandbox/test environment: safe endpoints and try-it guide.", "https://hormazdaruwala.vercel.app/sandbox.md") +
       `# Sandbox — Hormaz Daruwala\n\nSafe test surface: GET /api/sandbox describes the sandbox; POST /api/contact validates without sending email (202 + job_id); GET /api/jobs/{id} polls the job; POST /api/batch runs bulk reads. Rate limit 60 req/min demo. Full guide: https://hormazdaruwala.vercel.app/sandbox\n`;
