@@ -12,11 +12,11 @@ export const metadata: Metadata = {
 };
 
 const tiers = [
-  { n: "Landing page", p: "from $800", f: ["Next.js + Tailwind", "SEO + OG + sitemap", "Contact / booking form", "1–2 week delivery", "2 revision rounds"] },
-  { n: "Full-stack platform", p: "from $3,500", f: ["Next.js + PostgreSQL", "Auth + RBAC + admin panel", "APIs + VPS deploy (Nginx/SSL)", "Analytics + hardening", "4–8 week delivery"] },
-  { n: "Web3 build", p: "from $4,500", f: ["Solidity on Base / BNB / Polygon", "Wallet + swaps + oracles", "AI agent integration", "Audit-ready code", "4–8 week delivery"] },
-  { n: "Mobile app", p: "from $3,000", f: ["React Native / Expo", "iOS + Android", "Play Store release", "OTA updates", "3–6 week delivery"] },
-  { n: "Monthly retainer", p: "$1,500/mo", f: ["~40 hrs/month", "Priority replies <24h", "Roadmap + maintenance", "Pause anytime"] },
+  { n: "Landing page", p: "from $800", price: 800, f: ["Next.js + Tailwind", "SEO + OG + sitemap", "Contact / booking form", "1–2 week delivery", "2 revision rounds"] },
+  { n: "Full-stack platform", p: "from $3,500", price: 3500, f: ["Next.js + PostgreSQL", "Auth + RBAC + admin panel", "APIs + VPS deploy (Nginx/SSL)", "Analytics + hardening", "4–8 week delivery"] },
+  { n: "Web3 build", p: "from $4,500", price: 4500, f: ["Solidity on Base / BNB / Polygon", "Wallet + swaps + oracles", "AI agent integration", "Audit-ready code", "4–8 week delivery"] },
+  { n: "Mobile app", p: "from $3,000", price: 3000, f: ["React Native / Expo", "iOS + Android", "Play Store release", "OTA updates", "3–6 week delivery"] },
+  { n: "Monthly retainer", p: "$1,500/mo", price: 1500, f: ["~40 hrs/month", "Priority replies <24h", "Roadmap + maintenance", "Pause anytime"] },
 ];
 
 export default function PricingPage() {
@@ -24,12 +24,19 @@ export default function PricingPage() {
     "@context": "https://schema.org",
     "@type": "ItemList",
     itemListElement: tiers.map((t, i) => ({
-      "@type": "Offer",
+      "@type": "ListItem",
       position: i + 1,
-      name: t.n,
-      priceSpecification: { "@type": "PriceSpecification", price: t.p, priceCurrency: "USD" },
-      url: `${SITE_URL}/pricing`,
-      seller: { "@type": "Person", name: "Hormaz Daruwala", url: SITE_URL },
+      item: {
+        "@type": "Offer",
+        name: t.n,
+        url: `${SITE_URL}/pricing`,
+        priceSpecification: {
+          "@type": "PriceSpecification",
+          price: t.price,
+          priceCurrency: "USD",
+        },
+        seller: { "@type": "Person", name: "Hormaz Daruwala", url: SITE_URL },
+      },
     })),
   };
   return (

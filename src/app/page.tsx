@@ -35,27 +35,25 @@ export default function Home() {
         <a href="/auth.md">Agent auth</a>
         <a href="https://github.com/coderhormaz/Portfolio">Source repo with AGENTS.md</a>
       </nav>
-      {/* Declarative WebMCP preview surface (programmatic registration lives in WebMCP.tsx) */}
+      {/* Declarative WebMCP preview surface (programmatic registration lives in WebMCP.tsx).
+          `hidden` keeps the tool markup in the DOM for scanners while removing it
+          from the accessibility tree (no aria-hidden focusables). */}
       <form
+        hidden
         {...{ toolname: "get_profile", tooldescription: "Get Hormaz Daruwala's public profile, roles, and availability." } as Record<string, string>}
         action="/api/profile"
         method="get"
-        className="sr-only"
-        aria-hidden="true"
-        tabIndex={-1}
       >
-        <button type="submit">Get profile</button>
+        <button type="submit" tabIndex={-1}>Get profile</button>
       </form>
       <form
+        hidden
         {...{ toolname: "search_projects", tooldescription: "Search portfolio projects by kind and keyword." } as Record<string, string>}
         action="/api/projects"
         method="get"
-        className="sr-only"
-        aria-hidden="true"
-        tabIndex={-1}
       >
-        <input type="text" name="q" />
-        <button type="submit">Search projects</button>
+        <input type="text" name="q" aria-label="Project search query" tabIndex={-1} />
+        <button type="submit" tabIndex={-1}>Search projects</button>
       </form>
     </>
   );

@@ -176,7 +176,7 @@ export default function Projects() {
         />
 
         <Reveal>
-          <div className="mask-fade-x mt-8 overflow-hidden pb-2 sm:mt-10" aria-label="Hackathon record, auto-scrolling">
+          <div role="marquee" aria-label="Hackathon record, auto-scrolling" className="mask-fade-x mt-8 overflow-hidden pb-2 sm:mt-10">
             <div className="flex w-max animate-marquee gap-2 pr-2 motion-reduce:animate-none hover:[animation-play-state:paused]">
               {[...hackathons, ...hackathons].map((h, i) => {
                 const styles =

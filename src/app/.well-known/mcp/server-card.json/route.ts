@@ -1,16 +1,5 @@
-import { SITE_URL } from "@/lib/site";
+import { productCard, serveCard } from "@/lib/server-card";
 
-export async function GET() {
-  return Response.json({
-    $schema: "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
-    name: "com.hormazdaruwala/portfolio-mcp",
-    title: "Hormaz Daruwala Portfolio MCP",
-    description: "Query Hormaz Daruwala profile and work.",
-    version: "1.0.0",
-    icons: [{ src: `${SITE_URL}/logo.svg`, mimeType: "image/svg+xml" }],
-    websiteUrl: SITE_URL,
-    repository: "https://github.com/coderhormaz/Portfolio",
-    remotes: [{ type: "streamable-http", url: `${SITE_URL}/api/mcp` }],
-    serverUrl: `${SITE_URL}/api/mcp`,
-  });
+export async function GET(req: Request) {
+  return serveCard(req, productCard());
 }

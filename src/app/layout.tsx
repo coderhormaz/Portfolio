@@ -158,11 +158,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     provider: { "@type": "Person", name: "Hormaz Daruwala", url: SITE_URL },
     areaServed: "Worldwide",
     url: `${SITE_URL}/pricing`,
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5",
-      reviewCount: "12",
-    },
   };
 
   return (
@@ -173,7 +168,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </head>
-      <body className="grain min-h-screen overflow-x-clip bg-[#0a0a0c] text-[#ece8de] antialiased">
+      <body id="top" className="grain min-h-screen overflow-x-clip bg-[#0a0a0c] text-[#ece8de] antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -202,8 +197,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SmoothScroll />
           <CustomCursor />
           <WebMCP />
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[300] focus:rounded-full focus:bg-[#ece8de] focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-black"
+          >
+            Skip to content
+          </a>
           <Navbar />
-          <main className="min-w-0 overflow-x-clip">{children}</main>
+          <main id="main-content" className="min-w-0 overflow-x-clip">{children}</main>
         </PreloaderGate>
       </body>
     </html>

@@ -50,8 +50,12 @@ export default function Preloader({ onDone }: { onDone: () => void }) {
       exit={{ y: "-100%" }}
       transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
       onClick={finish}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") finish();
+      }}
+      tabIndex={0}
       role="status"
-      aria-label="Loading portfolio"
+      aria-label="Loading portfolio. Press Enter to skip."
     >
       {/* faint backdrop glow + grid */}
       <div className="pointer-events-none absolute inset-0">
