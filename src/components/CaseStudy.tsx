@@ -125,19 +125,22 @@ export default function CaseStudy({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto overscroll-contain bg-[#06060a]/92 px-3 py-4 backdrop-blur-xl sm:px-6 sm:py-8"
+          className="fixed inset-0 z-[170] overflow-y-auto overscroll-contain bg-[#06060a]/92 backdrop-blur-xl"
           onClick={onClose}
           role="dialog"
           aria-modal="true"
           aria-labelledby="case-study-title"
         >
+          {/* min-h-full + no auto margins: centers short content yet always
+              scrolls fully when the panel exceeds the viewport */}
+          <div className="flex min-h-full items-center justify-center p-3 sm:p-6">
           <motion.div
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }}
             transition={{ duration: 0.5, ease: [...EASE] }}
             onClick={(e) => e.stopPropagation()}
-            className="relative my-auto w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0f0f13] shadow-[0_40px_140px_rgba(0,0,0,0.8)] sm:rounded-[2rem]"
+            className="relative w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0f0f13] shadow-[0_40px_140px_rgba(0,0,0,0.8)] sm:rounded-[2rem]"
           >
             <button
               ref={closeRef}
@@ -288,6 +291,7 @@ export default function CaseStudy({
               </button>
             </div>
           </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

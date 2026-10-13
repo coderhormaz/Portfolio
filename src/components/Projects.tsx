@@ -88,8 +88,8 @@ function BuildCard({
     const el = cardRef.current;
     if (!el || !p.video) return;
     if (typeof IntersectionObserver === "undefined") {
-      setMounted(true);
-      return;
+      const t = setTimeout(() => setMounted(true));
+      return () => clearTimeout(t);
     }
     const io = new IntersectionObserver(
       ([e]) => {

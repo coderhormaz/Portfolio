@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Inter, Instrument_Serif, Space_Grotesk, Space_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
@@ -88,30 +88,40 @@ export const viewport: Viewport = {
   themeColor: "#0a0a0c",
 };
 
-/* Self-hosted via next/font: zero fonts.gstatic.com requests,
-   so crawlers and visitors never depend on the Google Fonts CDN. */
-const grotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+/* Vendored in src/app/fonts: zero Google Fonts requests at build, dev,
+   or runtime — crawlers and visitors never depend on the Fonts CDN. */
+const grotesk = localFont({
+  src: [
+    { path: "./fonts/space-grotesk-400.woff2", weight: "400" },
+    { path: "./fonts/space-grotesk-500.woff2", weight: "500" },
+    { path: "./fonts/space-grotesk-600.woff2", weight: "600" },
+    { path: "./fonts/space-grotesk-700.woff2", weight: "700" },
+  ],
   variable: "--font-grotesk",
   display: "swap",
 });
-const instrument = Instrument_Serif({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
+const instrument = localFont({
+  src: [
+    { path: "./fonts/instrument-serif-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/instrument-serif-400-italic.woff2", weight: "400", style: "italic" },
+  ],
   variable: "--font-instrument",
   display: "swap",
 });
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const inter = localFont({
+  src: [
+    { path: "./fonts/inter-400.woff2", weight: "400" },
+    { path: "./fonts/inter-500.woff2", weight: "500" },
+    { path: "./fonts/inter-600.woff2", weight: "600" },
+  ],
   variable: "--font-inter",
   display: "swap",
 });
-const spacemono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+const spacemono = localFont({
+  src: [
+    { path: "./fonts/space-mono-400.woff2", weight: "400" },
+    { path: "./fonts/space-mono-700.woff2", weight: "700" },
+  ],
   variable: "--font-spacemono",
   display: "swap",
 });
