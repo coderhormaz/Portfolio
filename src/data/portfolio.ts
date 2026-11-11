@@ -253,6 +253,28 @@ export const clientProjects: Project[] = [
     ],
   },
   {
+    title: "Language Seva",
+    subtitle: "Language training & services platform",
+    description:
+      "Complete language services platform: self-paced and trainer-led courses (Mandarin, Japanese, Korean, Spanish and more), student login, translation across 50+ languages, interpretation, corporate services and certificate verification.",
+    tags: ["Next.js", "EdTech", "Courses", "Student Login"],
+    link: "https://languageseva.com",
+    linkLabel: "languageseva.com",
+    year: "2026",
+    role: "Full-stack · design",
+    highlights: [
+      "Course pages per language with self-paced and trainer-led learning paths.",
+      "Student login plus certificate verification for earned credentials.",
+      "Service catalogue: translation, interpretation, transcription, subtitling and localization.",
+      "Corporate offerings and enquiry flows for businesses and individual learners.",
+    ],
+    metrics: [
+      { v: "50+", l: "languages covered" },
+      { v: "12+", l: "course languages" },
+      { v: "B2B", l: "corporate services" },
+    ],
+  },
+  {
     title: "Techshala Platform",
     subtitle: "College developer ecosystem",
     description:
