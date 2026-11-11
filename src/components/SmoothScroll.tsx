@@ -12,6 +12,18 @@ export default function SmoothScroll() {
       touchMultiplier: 1.5,
     });
 
+    /* Arriving from another page with a hash (e.g. /about → /#work):
+       sync Lenis to the target section so it doesn't fight the native jump. */
+    const initialHash = window.location.hash;
+    if (initialHash && initialHash !== "#") {
+      const el = document.querySelector(initialHash);
+      if (el) {
+        requestAnimationFrame(() =>
+          lenis.scrollTo(el as HTMLElement, { immediate: true, offset: 0 })
+        );
+      }
+    }
+
     const onClick = (e: Event) => {
       const target = e.target as HTMLElement;
       const anchor = target.closest('a[href^="#"]') as HTMLAnchorElement | null;

@@ -211,6 +211,48 @@ export const clientProjects: Project[] = [
     ],
   },
   {
+    title: "Markobenz Industries",
+    subtitle: "EPS manufacturer · corporate site",
+    description:
+      "Corporate website for Pune's Expandable Polystyrene manufacturer: product catalogue (EPS resin, white EPS), company information, FAQ and enquiry flows.",
+    tags: ["Next.js", "Corporate", "SEO", "Manufacturing"],
+    link: "https://markobenz.com",
+    linkLabel: "markobenz.com",
+    year: "2026",
+    role: "Full-stack · design",
+    highlights: [
+      "Product catalogue covering specialised EPS grades with dedicated product pages.",
+      "Company profile: quality policy, EHS policy, objectives and director's message.",
+      "Contact and enquiry paths wired for quote requests across India.",
+    ],
+    metrics: [
+      { v: "6", l: "specialised grades" },
+      { v: "ISO", l: "certified manufacturer" },
+      { v: "24h", l: "dispatch cadence" },
+    ],
+  },
+  {
+    title: "Discover Technologies",
+    subtitle: "Digital studio website",
+    description:
+      "Studio site for websites, LMS platforms and custom software: services, selected work showcase, internship applications and project enquiry flow.",
+    tags: ["Next.js", "Studio", "CMS", "Internships"],
+    link: "https://discovertechnologies.co.in",
+    linkLabel: "discovertechnologies.co.in",
+    year: "2026",
+    role: "Full-stack · design",
+    highlights: [
+      "Services architecture: website development, LMS platforms and custom software.",
+      "Selected-work showcase linking each build to its live production website.",
+      "Internship application flow with detail pages for prospective developers.",
+    ],
+    metrics: [
+      { v: "3", l: "service lines" },
+      { v: "4+", l: "live client builds" },
+      { v: "Intern", l: "program + applications" },
+    ],
+  },
+  {
     title: "Techshala Platform",
     subtitle: "College developer ecosystem",
     description:

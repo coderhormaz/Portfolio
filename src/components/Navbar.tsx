@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { navLinks, profile } from "@/data/portfolio";
@@ -60,6 +61,12 @@ export default function Navbar() {
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
 
+  /* Hash links (#about, #contact…) only work on the home page. On other
+     routes (e.g. /about, /docs) prefix them so clicking goes home first. */
+  const pathname = usePathname();
+  const onHome = pathname === "/";
+  const go = (hash: string) => (onHome ? hash : `/${hash}`);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
@@ -98,7 +105,7 @@ export default function Navbar() {
         />
         <div className="mx-auto flex w-full max-w-[1440px] min-w-0 items-center justify-between gap-2 px-4 pt-3 sm:px-6 sm:pt-4 lg:px-8">
           <a
-            href="#top"
+            href={go("#top")}
             aria-label="HORMAZ® ©2026 — back to top"
             className={`flex min-w-0 items-center gap-2 rounded-full py-2 pl-2.5 pr-4 sm:py-2.5 sm:pl-4 sm:pr-5 transition-all duration-500 ${
               scrolled ? "bg-[#ece8de] text-[#131313] shadow-xl" : "bg-white/[0.04] text-[#ece8de] backdrop-blur-xl border border-white/10"
@@ -129,7 +136,7 @@ export default function Navbar() {
               return (
                 <a
                   key={l.href}
-                  href={l.href}
+                  href={go(l.href)}
                   aria-current={on ? "true" : undefined}
                   className={`relative flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium transition-colors duration-300 ${
                     on ? "text-white" : "hover:text-white"
@@ -166,7 +173,7 @@ export default function Navbar() {
               BOM {time}
             </span>
             <a
-              href="#contact"
+              href={go("#contact")}
               tabIndex={open ? -1 : undefined}
               aria-hidden={open}
               className={`group hidden min-[400px]:inline-flex items-center gap-1.5 rounded-full bg-[#ff4d00] px-4 sm:px-5 py-2.5 sm:py-3 text-[13px] font-bold text-black transition-all duration-300 hover:bg-[#ece8de] hover:text-black ${
@@ -207,7 +214,7 @@ export default function Navbar() {
               {navLinks.map((l, i) => (
                 <motion.a
                   key={l.href}
-                  href={l.href}
+                  href={go(l.href)}
                   onClick={() => setOpen(false)}
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
