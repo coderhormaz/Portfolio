@@ -2,308 +2,314 @@ import {
   ACESFilmicToneMapping,
   BufferGeometry,
   CanvasTexture,
+  CylinderGeometry,
   DirectionalLight,
-  ExtrudeGeometry,
+  Float32BufferAttribute,
   Group,
-  HemisphereLight,
-  Line,
-  LineDashedMaterial,
+  InstancedMesh,
   MathUtils,
   Mesh,
   MeshBasicMaterial,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
+  NoColorSpace,
+  Object3D,
   OrthographicCamera,
   PlaneGeometry,
+  PMREMGenerator,
+  RepeatWrapping,
   Scene,
-  Shape,
-  SphereGeometry,
   SRGBColorSpace,
-  Vector3,
   WebGLRenderer,
 } from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
-export type DeploymentStep = "Commit" | "Build" | "Live";
-
-const panelWidth = 3.72;
-const panelHeight = 2.02;
-const panelThickness = 0.075;
-const faceWidth = 1024;
-const faceHeight = 556;
-const mono = '"Consolas", "Courier New", monospace';
-
-function createPanelShape() {
-  const x = panelWidth / 2;
-  const y = panelHeight / 2;
-  const radius = 0.1;
-  const shape = new Shape();
-  shape.moveTo(-x + radius, -y);
-  shape.lineTo(x - radius, -y);
-  shape.quadraticCurveTo(x, -y, x, -y + radius);
-  shape.lineTo(x, y - radius);
-  shape.quadraticCurveTo(x, y, x - radius, y);
-  shape.lineTo(-x + radius, y);
-  shape.quadraticCurveTo(-x, y, -x, y - radius);
-  shape.lineTo(-x, -y + radius);
-  shape.quadraticCurveTo(-x, -y, -x + radius, -y);
-  return shape;
-}
-
-function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius = 20) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, width, height, radius);
-}
-
-function drawInterface(ctx: CanvasRenderingContext2D, preview: HTMLImageElement) {
-  ctx.save();
-  roundedRect(ctx, 26, 92, 972, 438);
-  ctx.clip();
-  ctx.drawImage(preview, 26, 92, 972, 438);
-  ctx.restore();
-}
-
-function drawApi(ctx: CanvasRenderingContext2D) {
-  const boxes = [
-    { x: 36, title: "REQUEST", detail: "Course enrollment", accent: "#ffb077" },
-    { x: 565, title: "RESPONSE", detail: "200 OK", accent: "#ace2c6" },
+function createKeycap() {
+  const sections = [
+    [0.56, 3.39, 2.48, 0.31],
+    [0.59, 3.49, 2.58, 0.34],
+    [0.65, 3.53, 2.62, 0.36],
+    [0.73, 3.50, 2.60, 0.36],
+    [1.26, 3.18, 2.28, 0.31],
+    [1.37, 3.07, 2.18, 0.30],
+    [1.43, 2.97, 2.08, 0.27],
+    [1.46, 2.87, 1.98, 0.24],
+    [1.45, 2.75, 1.86, 0.23],
+    [1.425, 2.59, 1.71, 0.21],
   ];
+  const pointsPerCorner = 9;
+  const pointsPerRing = 4 * pointsPerCorner;
+  const positions: number[] = [];
+  const faces: number[] = [];
 
-  for (const { x, title, detail, accent } of boxes) {
-    roundedRect(ctx, x, 124, 423, 361);
-    ctx.fillStyle = "#241d1b";
-    ctx.fill();
-    ctx.strokeStyle = "#785644";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.font = `600 34px ${mono}`;
-    ctx.fillStyle = accent;
-    ctx.fillText(title, x + 32, 196);
-    ctx.font = "500 37px system-ui, sans-serif";
-    ctx.fillStyle = "#fff1e5";
-    ctx.fillText(detail, x + 32, 263);
+  sections.forEach(([y, width, depth, radius], ring) => {
+    for (let corner = 0; corner < 4; corner += 1) {
+      const middle = Math.PI * (0.5 * corner + 0.25);
+      const centerX = Math.sign(Math.cos(middle)) * (width / 2 - radius);
+      const centerZ = Math.sign(Math.sin(middle)) * (depth / 2 - radius);
+      for (let point = 0; point < pointsPerCorner; point += 1) {
+        const angle = Math.PI * (corner + point / (pointsPerCorner - 1)) / 2;
+        positions.push(centerX + Math.cos(angle) * radius, y, centerZ + Math.sin(angle) * radius);
+      }
+    }
 
-    ctx.fillStyle = "#996e586e";
-    ctx.fillRect(x + 32, 329, 231, 11);
-    ctx.fillRect(x + 32, 365, 149, 11);
-    ctx.fillRect(x + 32, 401, 196, 11);
-  }
-
-  ctx.strokeStyle = "#ffb077";
-  ctx.lineWidth = 7;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(478, 301);
-  ctx.lineTo(543, 301);
-  ctx.moveTo(524, 283);
-  ctx.lineTo(543, 301);
-  ctx.lineTo(524, 320);
-  ctx.stroke();
-}
-
-function drawDatabase(ctx: CanvasRenderingContext2D) {
-  const tables = ["Courses", "Enrollments", "Sessions"];
-
-  tables.forEach((table, index) => {
-    const y = 112 + index * 130;
-    roundedRect(ctx, 36, y, 952, 108);
-    ctx.fillStyle = index % 2 ? "#26322e" : "#202a27";
-    ctx.fill();
-    ctx.strokeStyle = "#456256";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    ctx.fillStyle = "#a4d9bd";
-    ctx.beginPath();
-    ctx.arc(90, y + 54, 11, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.font = "500 39px system-ui, sans-serif";
-    ctx.fillStyle = "#f3f5e7";
-    ctx.fillText(table, 126, y + 68);
-
-    ctx.fillStyle = "#729887";
-    ctx.fillRect(522, y + 47, 140, 12);
-    ctx.fillRect(723, y + 47, 85, 12);
-    ctx.fillRect(858, y + 47, 72, 12);
-  });
-}
-
-function drawBuild(ctx: CanvasRenderingContext2D) {
-  roundedRect(ctx, 36, 112, 952, 390);
-  ctx.fillStyle = "#192420";
-  ctx.fill();
-  ctx.strokeStyle = "#537160";
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  ["Compile application", "Check types", "Generate output"].forEach((task, index) => {
-    const y = 207 + index * 111;
-    ctx.font = `600 39px ${mono}`;
-    ctx.fillStyle = "#a4d9bd";
-    ctx.fillText("✓", 82, y);
-    ctx.fillStyle = "#ecf5e9";
-    ctx.fillText(task, 147, y);
-    if (index < 2) {
-      ctx.fillStyle = "#53716080";
-      ctx.fillRect(82, y + 39, 859, 3);
+    if (ring === 0) return;
+    for (let point = 0; point < pointsPerRing; point += 1) {
+      const lower = (ring - 1) * pointsPerRing + point;
+      const next = (ring - 1) * pointsPerRing + (point + 1) % pointsPerRing;
+      faces.push(lower, lower + pointsPerRing, next, next, lower + pointsPerRing, next + pointsPerRing);
     }
   });
+
+  const top = (sections.length - 1) * pointsPerRing;
+  const topCenter = sections.length * pointsPerRing;
+  const bottomCenter = topCenter + 1;
+  positions.push(0, 1.425, 0, 0, 0.56, 0);
+  for (let point = 0; point < pointsPerRing; point += 1) {
+    const next = (point + 1) % pointsPerRing;
+    faces.push(topCenter, top + next, top + point, bottomCenter, point, next);
+  }
+
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
+  const uv = [];
+  for (let index = 0; index < positions.length; index += 3) {
+    uv.push(positions[index] / 3.54 + 0.5, positions[index + 2] / 2.64 + 0.5);
+  }
+  geometry.setAttribute("uv", new Float32BufferAttribute(uv, 2));
+  geometry.setIndex(faces);
+  geometry.computeVertexNormals();
+  return geometry;
 }
 
-function createPanelTexture(title: string, detail: string, draw: (ctx: CanvasRenderingContext2D) => void) {
+function makeTexture(width: number, height: number, draw: (ctx: CanvasRenderingContext2D) => void) {
   const canvas = document.createElement("canvas");
-  canvas.width = faceWidth;
-  canvas.height = faceHeight;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not draw the deployment preview");
-
-  roundedRect(ctx, 1, 1, faceWidth - 2, faceHeight - 2, 29);
-  ctx.clip();
-  const color = ctx.createLinearGradient(0, 0, faceWidth, faceHeight);
-  color.addColorStop(0, "#342921");
-  color.addColorStop(0.45, "#211b19");
-  color.addColorStop(1, "#171719");
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, faceWidth, faceHeight);
-  ctx.strokeStyle = "#db9d737d";
-  ctx.lineWidth = 7;
-  ctx.stroke();
-
-  ctx.font = `600 38px ${mono}`;
-  ctx.fillStyle = "#ffe1c8";
-  ctx.fillText(title, 36, 60);
-  ctx.font = `500 29px ${mono}`;
-  ctx.textAlign = "right";
-  ctx.fillStyle = "#d5bdac";
-  ctx.fillText(detail, 988, 60);
-  ctx.textAlign = "left";
-
-  ctx.fillStyle = "#ba886a4d";
-  ctx.fillRect(26, 76, 972, 3);
+  if (!ctx) throw new Error("Could not draw the model details");
   draw(ctx);
-
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 4;
   return texture;
 }
 
-export function createHeroScene(
-  stage: HTMLElement,
-  canvas: HTMLCanvasElement,
-  context: WebGL2RenderingContext,
-  preview: HTMLImageElement,
-  onStepChange: (step: DeploymentStep) => void,
-) {
-  const textures = [
-    createPanelTexture("INTERFACE", "AISkool.com", (ctx) => drawInterface(ctx, preview)),
-    createPanelTexture("API", "HTTP", drawApi),
-    createPanelTexture("DATABASE", "PostgreSQL", drawDatabase),
-  ];
-  const buildTexture = createPanelTexture("BUILD", "PASSED", drawBuild);
+function drawLegend(ctx: CanvasRenderingContext2D) {
+  ctx.fillStyle = "#fff0d7";
+  ctx.font = '600 125px "Segoe UI", sans-serif';
+  ctx.fillText("enter", 48, 185);
+  ctx.strokeStyle = "#fff0d7";
+  ctx.lineWidth = 17;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(704, 95);
+  ctx.lineTo(704, 205);
+  ctx.lineTo(541, 205);
+  ctx.moveTo(581, 162);
+  ctx.lineTo(541, 205);
+  ctx.lineTo(581, 246);
+  ctx.stroke();
+}
 
+function drawShadow(ctx: CanvasRenderingContext2D) {
+  const shadow = ctx.createRadialGradient(128, 128, 27, 128, 128, 127);
+  shadow.addColorStop(0, "rgba(0,0,0,0.95)");
+  shadow.addColorStop(0.46, "rgba(0,0,0,0.68)");
+  shadow.addColorStop(0.74, "rgba(0,0,0,0.27)");
+  shadow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = shadow;
+  ctx.fillRect(0, 0, 256, 256);
+}
+
+function drawGrain(ctx: CanvasRenderingContext2D) {
+  const image = ctx.createImageData(128, 128);
+  let seed = 7249;
+  for (let pixel = 0; pixel < 128 * 128; pixel += 1) {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    const row = Math.floor(pixel / 128);
+    const value = 110 + 15 * Math.sin(row * 1.4) + (seed >>> 27);
+    image.data.set([value, value, value, 255], pixel * 4);
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+function drawTraces(ctx: CanvasRenderingContext2D) {
+  ctx.strokeStyle = "#ce9a626b";
+  ctx.lineWidth = 1.7;
+  for (const side of [-1, 1]) {
+    for (let pin = 0; pin < 14; pin += 1) {
+      const x = 96 + pin * 24.6;
+      const y = 192 + side * 174.8;
+      const bend = y - side * (11 + (pin % 3) * 4);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, bend);
+      ctx.lineTo(x + 14, bend - side * 11);
+      ctx.lineTo(x + 14, bend - side * 27);
+      ctx.stroke();
+    }
+  }
+}
+
+function buildEnterKey() {
+  const model = new Group();
+  const darkMetal = new MeshStandardMaterial({ color: "#292d31", metalness: 0.78, roughness: 0.33 });
+  const shell = new MeshStandardMaterial({ color: "#404244", metalness: 0.85, roughness: 0.34 });
+  const copper = new MeshStandardMaterial({ color: "#c07146", metalness: 0.84, roughness: 0.33 });
+  const board = new MeshStandardMaterial({ color: "#243331", metalness: 0.38, roughness: 0.48 });
+  const hardware = new MeshStandardMaterial({ color: "#9a8570", metalness: 0.76, roughness: 0.29 });
+  const recess = new MeshStandardMaterial({ color: "#101415", metalness: 0.45, roughness: 0.56 });
+  const amber = new MeshPhysicalMaterial({
+    color: "#513a26",
+    metalness: 0.35,
+    roughness: 0.3,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.26,
+  });
+  const grain = makeTexture(128, 128, drawGrain);
+  grain.colorSpace = NoColorSpace;
+  grain.wrapS = RepeatWrapping;
+  grain.wrapT = RepeatWrapping;
+  grain.repeat.set(3, 3);
+  const keyFinish = new MeshPhysicalMaterial({
+    color: "#a13e24",
+    metalness: 0.66,
+    roughness: 0.38,
+    clearcoat: 0.32,
+    clearcoatRoughness: 0.31,
+    bumpMap: grain,
+    bumpScale: 0.012,
+  });
+  const light = new MeshStandardMaterial({
+    color: "#ff9253",
+    emissive: "#ff6a31",
+    emissiveIntensity: 2,
+    roughness: 0.33,
+  });
+
+  function slab(width: number, height: number, depth: number, radius: number, material: MeshStandardMaterial, y: number) {
+    const mesh = new Mesh(new RoundedBoxGeometry(width, height, depth, 2, radius), material);
+    mesh.position.y = y;
+    model.add(mesh);
+    return mesh;
+  }
+
+  slab(4.28, 0.22, 3.32, 0.10, darkMetal, 0.11);
+  slab(4.33, 0.34, 3.37, 0.14, shell, 0.28);
+  slab(4.23, 0.065, 3.27, 0.03, copper, 0.432);
+  slab(4.08, 0.072, 3.12, 0.035, board, 0.465);
+  slab(2.61, 0.13, 1.77, 0.05, amber, 0.561);
+  slab(1.95, 0.12, 1.32, 0.055, darkMetal, 0.625);
+
+  const traces = makeTexture(512, 384, drawTraces);
+  const circuit = new Mesh(
+    new PlaneGeometry(4.08, 3.12),
+    new MeshBasicMaterial({ map: traces, transparent: true, depthWrite: false, toneMapped: false }),
+  );
+  circuit.rotation.x = -Math.PI / 2;
+  circuit.position.y = 0.503;
+  model.add(circuit);
+
+  const foot = new RoundedBoxGeometry(0.76, 0.10, 0.62, 2, 0.045);
+  const screw = new CylinderGeometry(0.118, 0.124, 0.033, 18);
+  const socket = new CylinderGeometry(0.055, 0.055, 0.006, 6);
+  for (const x of [-1.86, 1.86]) {
+    for (const z of [-1.37, 1.37]) {
+      const rubber = new Mesh(foot, recess);
+      rubber.position.set(x * 0.76, -0.042, z * 0.68);
+      const fastener = new Mesh(screw, hardware);
+      fastener.position.set(x, 0.512, z);
+      const inset = new Mesh(socket, recess);
+      inset.position.set(x, 0.53, z);
+      model.add(rubber, fastener, inset);
+    }
+  }
+
+  const contacts = new InstancedMesh(new RoundedBoxGeometry(0.11, 0.012, 0.044, 1, 0.006), copper, 28);
+  const transform = new Object3D();
+  for (let pin = 0; pin < 28; pin += 1) {
+    transform.position.set(-1.27 + (pin % 14) * 0.196, 0.507, pin < 14 ? 1.42 : -1.42);
+    transform.updateMatrix();
+    contacts.setMatrixAt(pin, transform.matrix);
+  }
+  model.add(contacts);
+
+  const port = slab(0.56, 0.12, 0.045, 0.020, recess, 0.28);
+  port.position.set(0, 0.28, -1.676);
+  const indicator = slab(0.25, 0.035, 0.020, 0.01, light, 0.27);
+  indicator.position.set(1.43, 0.269, 1.68);
+
+  const cap = new Mesh(createKeycap(), keyFinish);
+  cap.position.y = 0.14;
+  model.add(cap);
+  const legendTexture = makeTexture(768, 288, drawLegend);
+  legendTexture.anisotropy = 4;
+  const legend = new Mesh(
+    new PlaneGeometry(2.35, 0.88),
+    new MeshBasicMaterial({ map: legendTexture, transparent: true, depthWrite: false, toneMapped: false }),
+  );
+  legend.rotation.x = -Math.PI / 2;
+  legend.position.set(0, 1.568, 0.08);
+  model.add(legend);
+
+  return { model, textures: [grain, traces, legendTexture] };
+}
+
+export function createHeroScene(canvas: HTMLCanvasElement, context: WebGL2RenderingContext) {
   const renderer = new WebGLRenderer({ canvas, context, alpha: true });
   renderer.toneMapping = ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.12;
   const scene = new Scene();
-  const camera = new OrthographicCamera(-2, 2, 2, -2, 0.1, 20);
-  camera.position.z = 8;
+  const camera = new OrthographicCamera(-2.7, 2.7, 2.7, -2.7, 0.1, 30);
 
-  const stack = new Group();
-  scene.add(stack);
-  const body = new ExtrudeGeometry(createPanelShape(), {
-    depth: panelThickness,
-    bevelSegments: 2,
-    bevelSize: 0.032,
-    bevelThickness: 0.024,
-    curveSegments: 5,
-  });
-  const face = new PlaneGeometry(panelWidth, panelHeight);
-  const bodyMaterials = [
-    new MeshStandardMaterial({ color: "#ac6846", roughness: 0.43, metalness: 0.5 }),
-    new MeshStandardMaterial({ color: "#5b362a", roughness: 0.54, metalness: 0.4 }),
-  ];
-  const faceMaterials = textures.map((map) =>
-    new MeshBasicMaterial({ map, alphaTest: 0.5, toneMapped: false }),
+  const room = new RoomEnvironment();
+  const pmrem = new PMREMGenerator(renderer);
+  const environment = pmrem.fromScene(room, 0.05, 0.1, 100, { size: 128 });
+  scene.environment = environment.texture;
+  scene.environmentIntensity = 0.95;
+  room.dispose();
+  pmrem.dispose();
+
+  const keyLight = new DirectionalLight("#fff0da", 2.35);
+  keyLight.position.set(-3, 7, 5);
+  const rim = new DirectionalLight("#ffac70", 2.4);
+  rim.position.set(3, 2, -4);
+  const fill = new DirectionalLight("#aabcca", 0.6);
+  fill.position.set(5, 2, 5);
+  scene.add(keyLight, rim, fill);
+
+  const { model, textures } = buildEnterKey();
+  scene.add(model);
+  const shadowTexture = makeTexture(256, 256, drawShadow);
+  const shadow = new Mesh(
+    new PlaneGeometry(6.6, 5.5),
+    new MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false }),
   );
-  const panels = faceMaterials.map((material) => {
-    const panel = new Group();
-    const panelFace = new Mesh(face, material);
-    panelFace.position.z = panelThickness + 0.026;
-    panel.add(new Mesh(body, bodyMaterials), panelFace);
-    stack.add(panel);
-    return panel;
-  });
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.set(-0.12, -0.1, 0.14);
+  scene.add(shadow);
 
-  const key = new DirectionalLight("#ffceaa", 4);
-  key.position.set(-3, 5, 6);
-  const rim = new DirectionalLight("#ffa263", 2.4);
-  rim.position.set(3, -2, 1);
-  scene.add(key, rim, new HemisphereLight("#fff1d5", "#3f373b", 1.35));
+  let azimuth = 0.55;
+  let elevation = 0.56;
+  let pendingFrame = 0;
 
-  const guideMaterial = new LineDashedMaterial({
-    color: "#ec9867",
-    dashSize: 0.075,
-    gapSize: 0.062,
-    transparent: true,
-  });
-  const guides = [-1.54, 1.54].map((x) => {
-    const guide = new Line(
-      new BufferGeometry().setFromPoints([new Vector3(x, 1.18, -0.15), new Vector3(x, -1.25, -0.15)]),
-      guideMaterial,
+  function draw() {
+    const radius = 8;
+    camera.position.set(
+      Math.sin(azimuth) * Math.cos(elevation) * radius,
+      0.59 + Math.sin(elevation) * radius,
+      Math.cos(azimuth) * Math.cos(elevation) * radius,
     );
-    guide.computeLineDistances();
-    stack.add(guide);
-    return guide;
-  });
-  const signalShape = new SphereGeometry(0.04, 12, 8);
-  const signalMaterial = new MeshBasicMaterial({ color: "#ffd39a", toneMapped: false });
-  const signal = new Mesh(signalShape, signalMaterial);
-  stack.add(signal);
-
-  let playing = false;
-  let lastFrame: number | undefined;
-  let elapsed = 0;
-  let pointerX = 0;
-  let pointerY = 0;
-  let step: DeploymentStep = "Commit";
-
-  function pose(time: number, delta: number) {
-    const assembled = MathUtils.smoothstep(time, 3.65, 5.65) * (1 - MathUtils.smoothstep(time, 8.1, 10));
-    const nextStep: DeploymentStep = time < 2.9 || time >= 8.55 ? "Commit" : time < 5.65 ? "Build" : "Live";
-    if (step !== nextStep) {
-      step = nextStep;
-      faceMaterials[1].map = step === "Commit" ? textures[1] : buildTexture;
-      onStepChange(step);
-    }
-
-    stack.scale.setScalar(MathUtils.lerp(0.88, 1, assembled));
-    stack.rotation.x = MathUtils.damp(stack.rotation.x, pointerY * 0.14, 4, delta);
-    stack.rotation.y = MathUtils.damp(stack.rotation.y, pointerX * 0.22, 4, delta);
-    panels.forEach((panel, index) => {
-      panel.position.set(
-        MathUtils.lerp(0.06 * (index - 1), 0.09 * index, assembled),
-        MathUtils.lerp(1.10 - 1.1 * index, 0.13 - 0.17 * index, assembled),
-        MathUtils.lerp(0.05 - 0.18 * index, 0.45 - 0.33 * index, assembled),
-      );
-      panel.rotation.set(
-        MathUtils.lerp(-1.07, -0.12, assembled),
-        MathUtils.lerp(-0.24, -0.09, assembled),
-        MathUtils.lerp(0.04, 0.015, assembled),
-      );
-    });
-
-    guideMaterial.opacity = (1 - assembled) * 0.65;
-    for (const guide of guides) guide.visible = assembled < 0.97;
-    const traveling = (time % 1.45) / 1.45;
-    signal.visible = assembled < 0.7;
-    signal.position.set(1.54, MathUtils.lerp(1.18, -1.25, traveling), -0.13);
-    signal.scale.setScalar(Math.sin(traveling * Math.PI) * (1 - assembled));
+    camera.lookAt(0, 0.59, 0);
+    renderer.render(scene, camera);
   }
 
   function resize() {
     const { clientWidth: width, clientHeight: height } = canvas;
-    if (width === 0 || height === 0) return;
-
-    const extent = 2.18;
+    if (!width || !height) return;
+    const extent = 2.98;
     const aspect = width / height;
     const horizontal = extent * Math.max(aspect, 1);
     const vertical = extent * Math.max(1 / aspect, 1);
@@ -313,55 +319,38 @@ export function createHeroScene(
     camera.bottom = -vertical;
     camera.updateProjectionMatrix();
     renderer.setDrawingBufferSize(width, height, Math.min(window.devicePixelRatio, 1.5));
-    renderer.render(scene, camera);
+    draw();
   }
 
-  function onPointerMove(event: PointerEvent) {
-    if (event.pointerType === "touch") return;
-    const bounds = stage.getBoundingClientRect();
-    pointerX = (event.clientX - bounds.left) / bounds.width - 0.5;
-    pointerY = (event.clientY - bounds.top) / bounds.height - 0.5;
-  }
-
-  function resetPointer() {
-    pointerX = 0;
-    pointerY = 0;
-  }
-
-  function animate(time: number) {
-    const delta = lastFrame === undefined ? 0 : Math.min((time - lastFrame) / 1000, 0.05);
-    lastFrame = time;
-    elapsed = (elapsed + delta) % 10;
-    pose(elapsed, delta);
-    renderer.render(scene, camera);
-  }
-
-  pose(0, 0);
   resize();
   const sizeObserver = new ResizeObserver(resize);
-  sizeObserver.observe(stage);
-  stage.addEventListener("pointermove", onPointerMove, { passive: true });
-  stage.addEventListener("pointerleave", resetPointer);
+  sizeObserver.observe(canvas);
 
   return {
-    setPlaying(next: boolean) {
-      if (playing === next) return;
-      playing = next;
-      lastFrame = undefined;
-      renderer.setAnimationLoop(next ? animate : null);
+    rotate(dx: number, dy: number) {
+      azimuth = (azimuth - dx * 0.012) % (Math.PI * 2);
+      elevation = MathUtils.clamp(elevation + dy * 0.009, 0.14, 1.13);
+      if (pendingFrame) return;
+      pendingFrame = requestAnimationFrame(() => {
+        pendingFrame = 0;
+        draw();
+      });
     },
     dispose() {
-      renderer.setAnimationLoop(null);
+      cancelAnimationFrame(pendingFrame);
       sizeObserver.disconnect();
-      stage.removeEventListener("pointermove", onPointerMove);
-      stage.removeEventListener("pointerleave", resetPointer);
-      for (const guide of guides) guide.geometry.dispose();
-      for (const material of [...bodyMaterials, ...faceMaterials, guideMaterial, signalMaterial]) material.dispose();
+      const resources = new Set<{ dispose(): void }>();
+      scene.traverse((object) => {
+        if (!(object instanceof Mesh)) return;
+        resources.add(object.geometry);
+        for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+          resources.add(material);
+        }
+      });
+      for (const resource of resources) resource.dispose();
       for (const texture of textures) texture.dispose();
-      buildTexture.dispose();
-      body.dispose();
-      face.dispose();
-      signalShape.dispose();
+      shadowTexture.dispose();
+      environment.dispose();
       renderer.dispose();
     },
   };

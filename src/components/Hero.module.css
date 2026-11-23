@@ -88,7 +88,7 @@
 .primaryAction,
 .copyAction,
 .links a,
-.playback,
+.modelButton,
 .aboutLink {
   display: inline-flex;
   align-items: center;
@@ -123,7 +123,7 @@
 }
 
 .copyAction:hover,
-.playback:not([aria-disabled]):hover,
+.modelButton:not([aria-disabled]):hover,
 .aboutLink:hover {
   border-color: var(--orange);
   color: var(--orange);
@@ -164,44 +164,11 @@
   aspect-ratio: 1.07;
   justify-self: center;
   border: 1px solid var(--rule);
-  border-radius: 0.35rem;
+  border-radius: 0.55rem;
   background:
-    radial-gradient(ellipse at 62% 46%, #38271d 0%, #1b1514 52%, transparent 83%),
-    #110e0d;
+    radial-gradient(ellipse at 48% 49%, #3d302a, #241b19 56%, #171214 100%);
 }
 
-.stage::before {
-  position: absolute;
-  z-index: 1;
-  inset: 0.62rem;
-  pointer-events: none;
-  content: "";
-  --corner: #ffab796e;
-  background:
-    linear-gradient(var(--corner), var(--corner)) left top / 10px 1px,
-    linear-gradient(var(--corner), var(--corner)) left top / 1px 10px,
-    linear-gradient(var(--corner), var(--corner)) right top / 10px 1px,
-    linear-gradient(var(--corner), var(--corner)) right top / 1px 10px,
-    linear-gradient(var(--corner), var(--corner)) left bottom / 10px 1px,
-    linear-gradient(var(--corner), var(--corner)) left bottom / 1px 10px,
-    linear-gradient(var(--corner), var(--corner)) right bottom / 10px 1px,
-    linear-gradient(var(--corner), var(--corner)) right bottom / 1px 10px;
-  background-repeat: no-repeat;
-}
-
-.instrument {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(90deg, #ffb0871b 1px, transparent 1px),
-    linear-gradient(#ffb0871b 1px, transparent 1px);
-  background-size: 2rem 2rem;
-  background-position: center;
-  mask-image: radial-gradient(ellipse, #000 24%, transparent 80%);
-}
-
-.artwork,
 .poster,
 .canvas {
   position: absolute;
@@ -211,7 +178,8 @@
 }
 
 .artwork {
-  pointer-events: none;
+  position: absolute;
+  inset: 0 0 2.15rem;
 }
 
 .poster {
@@ -221,77 +189,38 @@
 .canvas {
   display: block;
   visibility: hidden;
+  cursor: grab;
+  touch-action: pan-y;
 }
 
-.stage[data-scene="ready"] .poster {
+.canvas:active {
+  cursor: grabbing;
+}
+
+.stage[data-model-view="ready"] .poster {
   visibility: hidden;
 }
 
-.stage[data-scene="ready"] .canvas {
+.stage[data-model-view="ready"] .canvas {
   visibility: visible;
 }
 
-.artCaption,
 .artControls {
   position: absolute;
   z-index: 2;
-  inset-inline: 0.95rem;
-}
-
-.artCaption {
-  inset-block-start: 0.95rem;
-  font: 400 0.72rem/1 var(--font-mono);
-}
-
-.artCaption a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  min-height: 2rem;
-  padding-inline: 0.45rem;
-  color: var(--warm-white);
-}
-
-.artCaption a:hover {
-  color: var(--orange);
-}
-
-.artControls {
-  inset-block-end: 0.95rem;
+  inset: auto 0.95rem 0.95rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.35rem;
-}
-
-.deployment,
-.deployment li {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.15rem, 1vw, 0.45rem);
-}
-
-.deployment {
+  gap: 0.6rem;
   color: var(--muted);
-  font: 400 clamp(0.62rem, 1.2vw, 0.72rem)/1 var(--font-mono);
+  font: 400 0.68rem/1.4 var(--font-mono);
 }
 
-.deployment li > span {
-  padding: 0.45rem 0.25rem;
-  border-bottom: 1px solid transparent;
-}
-
-.deployment [aria-current] > span {
-  border-color: var(--orange);
-  color: var(--warm-white);
-}
-
-.playback {
+.modelButton {
   flex-shrink: 0;
+  margin-inline-start: auto;
   min-height: 2.75rem;
-  min-width: 4.65rem;
-  padding-inline: 0.55rem;
-  gap: 0.35rem;
+  padding-inline: 0.75rem;
   border: 1px solid var(--rule);
   border-radius: 0.25rem;
   background: #1a1210;
@@ -299,16 +228,8 @@
   font: 400 0.68rem/1 var(--font-mono);
 }
 
-.playback[aria-disabled] {
+.modelButton[aria-disabled] {
   color: var(--muted);
-}
-
-@media (max-width: 36rem) {
-  .artwork {
-    inset: 0.5rem 0 2.3rem;
-    width: auto;
-    height: auto;
-  }
 }
 
 .footer {

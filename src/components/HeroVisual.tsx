@@ -1,173 +1,159 @@
 "use client";
 
-import { ArrowUpRight, ChevronRight, Pause, Play } from "lucide-react";
+import { Box, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { DeploymentStep } from "./hero-scene";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import styles from "./Hero.module.css";
 
-const motionQuery = "(prefers-reduced-motion: reduce)";
-const deploymentSteps = ["Commit", "Build", "Live"] as const;
-
-function subscribeToMotion(callback: () => void) {
-  const query = window.matchMedia(motionQuery);
-  query.addEventListener("change", callback);
-  return () => query.removeEventListener("change", callback);
-}
-
-function prefersReducedMotion() {
-  return window.matchMedia(motionQuery).matches;
-}
-
 type HeroScene = ReturnType<typeof import("./hero-scene").createHeroScene>;
+type ModelView = "still" | "loading" | "ready" | "unavailable";
+
+const rotationKeys: Partial<Record<string, [number, number]>> = {
+  ArrowLeft: [-14, 0],
+  ArrowRight: [14, 0],
+  ArrowUp: [0, 14],
+  ArrowDown: [0, -14],
+};
 
 export default function HeroVisual() {
-  const stageRef = useRef<HTMLElement>(null);
+  const [view, setView] = useState<ModelView>("still");
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const syncPlayback = useRef<((playing: boolean) => void) | null>(null);
-  const reduced = useSyncExternalStore(subscribeToMotion, prefersReducedMotion, () => true);
-  const [playingOverride, setPlayingOverride] = useState<boolean | null>(null);
-  const [status, setStatus] = useState<"poster" | "ready" | "unavailable">("poster");
-  const [step, setStep] = useState<DeploymentStep>("Commit");
-  const playing = playingOverride ?? !reduced;
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const sceneRef = useRef<HeroScene | null>(null);
+  const drag = useRef<{ id: number; x: number; y: number } | null>(null);
+  const inspecting = view === "loading" || view === "ready";
 
   useEffect(() => {
-    const stage = stageRef.current;
+    if (!inspecting) return;
     const canvas = canvasRef.current;
-    if (!stage || !canvas) return;
-
-    let scene: HeroScene | undefined;
-    let inView = false;
-    let wantsMotion = false;
+    if (!canvas) return;
     let stopped = false;
-    let loading = false;
-    let unavailable = false;
 
-    function fallBack() {
-      unavailable = true;
-      scene?.dispose();
-      scene = undefined;
-      setStatus("unavailable");
+    function unavailable() {
+      if (document.activeElement === canvas) buttonRef.current?.focus();
+      setView("unavailable");
     }
 
-    function canAnimate() {
-      return wantsMotion && inView && !document.hidden;
-    }
-
-    const updateScene = async () => {
-      if (stopped || unavailable) return;
-
-      if (scene) {
-        scene.setPlaying(canAnimate());
-        return;
-      }
-
-      if (!canAnimate() || loading) return;
-      loading = true;
-
+    async function openModel(target: HTMLCanvasElement) {
       try {
-        const preview = new window.Image();
-        preview.src = "/hero-aiskool.webp";
-        const [{ createHeroScene }] = await Promise.all([import("./hero-scene"), preview.decode()]);
-        if (stopped || unavailable || !canAnimate()) return;
-
-        const context = canvas.getContext("webgl2", {
+        const { createHeroScene } = await import("./hero-scene");
+        if (stopped) return;
+        const context = target.getContext("webgl2", {
           alpha: true,
           antialias: true,
           powerPreference: "low-power",
         });
         if (!context) {
-          fallBack();
+          unavailable();
           return;
         }
-
-        scene = createHeroScene(stage, canvas, context, preview, setStep);
-        scene.setPlaying(true);
-        setStatus("ready");
+        sceneRef.current = createHeroScene(target, context);
+        setView("ready");
       } catch {
-        if (!stopped) fallBack();
-      } finally {
-        loading = false;
+        if (!stopped) unavailable();
       }
-    };
+    }
 
-    syncPlayback.current = (next) => {
-      wantsMotion = next;
-      void updateScene();
-    };
-
-    const intersection = new IntersectionObserver(([entry]) => {
-      inView = entry.isIntersecting;
-      void updateScene();
-    });
-    intersection.observe(stage);
-    document.addEventListener("visibilitychange", updateScene);
-    canvas.addEventListener("webglcontextlost", fallBack);
+    canvas.addEventListener("webglcontextlost", unavailable);
+    void openModel(canvas);
 
     return () => {
       stopped = true;
-      syncPlayback.current = null;
-      intersection.disconnect();
-      document.removeEventListener("visibilitychange", updateScene);
-      canvas.removeEventListener("webglcontextlost", fallBack);
-      scene?.dispose();
+      drag.current = null;
+      canvas.removeEventListener("webglcontextlost", unavailable);
+      sceneRef.current?.dispose();
+      sceneRef.current = null;
     };
-  }, []);
+  }, [inspecting]);
 
   useEffect(() => {
-    syncPlayback.current?.(playing);
-  }, [playing]);
+    if (view === "ready" && document.activeElement === buttonRef.current) {
+      canvasRef.current?.focus({ preventScroll: true });
+    }
+  }, [view]);
 
-  const unavailable = status === "unavailable";
+  function startDrag(event: PointerEvent<HTMLCanvasElement>) {
+    if (view !== "ready" || drag.current || event.button !== 0) return;
+    drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function dragModel(event: PointerEvent<HTMLCanvasElement>) {
+    const start = drag.current;
+    if (!start || event.pointerId !== start.id) return;
+    sceneRef.current?.rotate(event.clientX - start.x, event.clientY - start.y);
+    drag.current = { id: start.id, x: event.clientX, y: event.clientY };
+  }
+
+  function endDrag(event: PointerEvent<HTMLCanvasElement>) {
+    if (event.pointerId === drag.current?.id) drag.current = null;
+  }
+
+  function useKeyboard(event: KeyboardEvent<HTMLCanvasElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      buttonRef.current?.focus();
+      setView("still");
+      return;
+    }
+    const amount = rotationKeys[event.key];
+    if (!amount) return;
+    event.preventDefault();
+    sceneRef.current?.rotate(...amount);
+  }
+
+  const controlLabel = {
+    still: "Rotate model",
+    loading: "Cancel loading",
+    ready: "Close 3D view",
+    unavailable: "3D unavailable",
+  }[view];
 
   return (
-    <figure ref={stageRef} className={styles.stage} data-scene={status}>
-      <figcaption className={styles.artCaption}>
-        <span className="sr-only">
-          An exploded view of the interface, API, and database assembled into the AISkool.com
-          preview during a simulated deployment.
-        </span>
-        <a href="https://aiskool.com" target="_blank" rel="noreferrer">
-          AISkool.com <ArrowUpRight size={14} aria-hidden="true" />
-        </a>
-      </figcaption>
-      <div className={styles.instrument} aria-hidden="true" />
-      <div className={styles.artwork} aria-hidden="true">
-        <Image
-          src="/hero-stack.webp"
-          alt=""
-          width={720}
-          height={720}
-          unoptimized
-          loading="eager"
-          className={styles.poster}
-        />
-        <canvas ref={canvasRef} className={styles.canvas} />
+    <figure className={styles.stage} data-model-view={view}>
+      <div className={styles.artwork}>
+        <picture>
+          <source media="(max-width: 29rem)" srcSet="/hero-enter-480.webp" />
+          <Image
+            src="/hero-enter.webp"
+            alt="A copper Enter key on a machined base with a circuit board and exposed fasteners"
+            width={880}
+            height={880}
+            unoptimized
+            fetchPriority="high"
+            loading="eager"
+            className={styles.poster}
+          />
+        </picture>
+        {inspecting && (
+          <canvas
+            ref={canvasRef}
+            className={styles.canvas}
+            tabIndex={view === "ready" ? 0 : -1}
+            aria-label="3D model of the Enter key"
+            aria-describedby="hero-model-help"
+            onPointerDown={startDrag}
+            onPointerMove={dragModel}
+            onLostPointerCapture={endDrag}
+            onKeyDown={useKeyboard}
+          />
+        )}
       </div>
       <div className={styles.artControls}>
-        <ol className={styles.deployment} aria-label="Deployment steps">
-          {deploymentSteps.map((label, index) => (
-            <li key={label} aria-current={status === "ready" && step === label ? "step" : undefined}>
-              {index > 0 && <ChevronRight size={12} aria-hidden="true" />}
-              <span>{label}</span>
-            </li>
-          ))}
-        </ol>
+        {view === "ready" && <span id="hero-model-help">Drag or use arrow keys</span>}
+        {view === "loading" && <span role="status">Loading model</span>}
+        {view === "unavailable" && <span role="status" className="sr-only">Showing the still image.</span>}
         <button
+          ref={buttonRef}
+          className={styles.modelButton}
           type="button"
-          className={styles.playback}
-          onClick={unavailable ? undefined : () => setPlayingOverride(!playing)}
-          aria-label={unavailable ? "Still view, 3D animation unavailable" : playing ? "Pause 3D animation" : "Play 3D animation"}
-          aria-disabled={unavailable || undefined}
-          tabIndex={unavailable ? -1 : undefined}
+          onClick={view === "unavailable" ? undefined : () => setView(inspecting ? "still" : "loading")}
+          aria-disabled={view === "unavailable" || undefined}
         >
-          {!unavailable && (playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />)}
-          {unavailable ? "Still view" : playing ? "Pause" : "Play"}
+          {inspecting ? <X size={15} aria-hidden="true" /> : <Box size={15} aria-hidden="true" />}
+          {controlLabel}
         </button>
       </div>
-      <span role="status" className="sr-only">
-        {unavailable && "The 3D artwork is shown as a still image."}
-      </span>
     </figure>
   );
 }
