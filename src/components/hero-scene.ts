@@ -7,10 +7,12 @@ import {
   DirectionalLight,
   Group,
   InstancedMesh,
+  LatheGeometry,
   MathUtils,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
+  NoColorSpace,
   Object3D,
   OrthographicCamera,
   PlaneGeometry,
@@ -19,7 +21,9 @@ import {
   Scene,
   SphereGeometry,
   SRGBColorSpace,
+  TorusGeometry,
   TubeGeometry,
+  Vector2,
   Vector3,
   WebGLRenderer,
   type BufferGeometry,
@@ -43,33 +47,60 @@ function texture(width: number, height: number, draw: (ctx: CanvasRenderingConte
 
 function drawWindow(ctx: CanvasRenderingContext2D) {
   const sky = ctx.createLinearGradient(0, 0, 0, 256);
-  sky.addColorStop(0, "#26335b");
-  sky.addColorStop(0.64, "#526d91");
-  sky.addColorStop(1, "#ce998c");
+  sky.addColorStop(0, "#121b35");
+  sky.addColorStop(0.52, "#394e70");
+  sky.addColorStop(0.78, "#836f89");
+  sky.addColorStop(1, "#bb8887");
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, 512, 256);
 
-  ctx.fillStyle = "#ffedce";
+  const halo = ctx.createRadialGradient(407, 56, 6, 407, 56, 26);
+  halo.addColorStop(0, "#f9e6c094");
+  halo.addColorStop(1, "#f9e6c000");
+  ctx.fillStyle = halo;
+  ctx.fillRect(381, 30, 52, 52);
+  ctx.fillStyle = "#e7dfcf";
   ctx.beginPath();
-  ctx.arc(407, 56, 15, 0, Math.PI * 2);
+  ctx.arc(407, 56, 8, 0, Math.PI * 2);
   ctx.fill();
-  for (let star = 0; star < 32; star += 1) {
-    ctx.fillStyle = star % 4 === 0 ? "#ffe8c9" : "#d5dfed68";
-    ctx.fillRect((star * 143 + 19) % 503, (star * 61 + 13) % 126, 2, 2);
+  for (let star = 0; star < 24; star += 1) {
+    ctx.fillStyle = star % 6 === 0 ? "#e4ebf2ac" : "#d5dfed48";
+    ctx.fillRect((star * 143 + 19) % 503, (star * 61 + 13) % 126, 1, 1);
   }
 
-  for (let tower = 0; tower < 22; tower += 1) {
-    const x = tower * 24;
-    const height = 20 + (tower * 19) % 66;
-    const y = 256 - height;
-    ctx.fillStyle = tower % 3 === 0 ? "#2c3853" : "#394665";
-    ctx.fillRect(x, y, 21, height);
-    ctx.fillStyle = "#f6bb80ad";
-    for (let floor = 0; floor < (height - 9) / 10; floor += 1) {
-      const offset = (tower + floor) % 2 ? 5 : 12;
-      ctx.fillRect(x + offset, y + 8 + floor * 10, 3, 3);
+  const distances = [
+    { color: "#58617a", spacing: 16, base: 234, height: 29 },
+    { color: "#373e57", spacing: 23, base: 246, height: 50 },
+    { color: "#242c44", spacing: 31, base: 256, height: 65 },
+  ];
+  distances.forEach(({ color, spacing, base, height }, layer) => {
+    for (let tower = 0; tower <= 512 / spacing; tower += 1) {
+      const x = tower * spacing + (tower * 7) % 11 - layer * 10;
+      const tall = 13 + ((tower * 31 + layer * 13) % height);
+      const y = base - tall;
+      const width = spacing - 4 - (tower % 4) * 2;
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, width, 256 - y);
+      if (tower % 4 === 0 && layer === 2) ctx.fillRect(x + width * 0.45, y - 8, 1, 8);
+
+      for (let floor = y + 6; floor < 255; floor += 6) {
+        for (let column = 4; column < width - 2; column += 5) {
+          if ((tower * 13 + floor * 7 + column * 3) % 9 > 3) continue;
+          ctx.fillStyle = (floor + column) % 5 === 0 ? "#f2caa996" : "#a1b6cf66";
+          ctx.fillRect(x + column, floor, 1.5, 2);
+        }
+      }
     }
-  }
+  });
+
+  ctx.save();
+  ctx.translate(215, 5);
+  ctx.transform(1, 0, -0.7, 1, 0, 0);
+  ctx.fillStyle = "#e8f5ff0d";
+  ctx.fillRect(0, 0, 23, 256);
+  ctx.fillRect(30, 0, 6, 256);
+  ctx.fillRect(139, 0, 14, 256);
+  ctx.restore();
 }
 
 function drawMonitor(ctx: CanvasRenderingContext2D) {
@@ -142,28 +173,75 @@ function drawShadow(ctx: CanvasRenderingContext2D) {
   ctx.fillRect(0, 0, 256, 256);
 }
 
+function drawWood(ctx: CanvasRenderingContext2D) {
+  const { width, height } = ctx.canvas;
+  const image = ctx.createImageData(width, height);
+  let seed = 2017;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      const bend = Math.sin(y * 0.015 + x * 0.051) * 3 + 1.4 * Math.sin(y * 0.037);
+      const grain = x + bend;
+      const vein = Math.pow(Math.abs(Math.sin(grain * 0.31 + Math.sin(grain * 0.09))), 8);
+      const color = 225 + Math.sin(grain * 0.15) * 10 - vein * 33 + (seed >>> 28) * 0.7;
+      const offset = (y * width + x) * 4;
+      image.data[offset] = color;
+      image.data[offset + 1] = color - 4;
+      image.data[offset + 2] = color - 9;
+      image.data[offset + 3] = 255;
+    }
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+function drawSurfaceGrain(ctx: CanvasRenderingContext2D) {
+  const { width, height } = ctx.canvas;
+  const image = ctx.createImageData(width, height);
+  let seed = 97127;
+  for (let offset = 0; offset < image.data.length; offset += 4) {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    const gray = 98 + (seed >>> 26);
+    image.data[offset] = image.data[offset + 1] = image.data[offset + 2] = gray;
+    image.data[offset + 3] = 255;
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
 function buildWorkshop() {
   const model = new Group();
   const blocks = new Map<Material, Matrix4[]>();
   const transform = new Object3D();
-  const matte = (color: string, roughness = 0.72) => new MeshStandardMaterial({ color, roughness });
-  const base = matte("#283348", 0.49);
-  const ink = matte("#1c2938");
-  const wall = matte("#496079");
-  const frame = matte("#26364d", 0.5);
-  const oak = matte("#b27f57");
-  const walnut = matte("#694738");
-  const paper = matte("#e6d3b7");
-  const clay = matte("#bb6657");
-  const seat = matte("#398a9c", 0.51);
-  const teal = matte("#608b85");
-  const green = matte("#628e70");
-  const sage = matte("#96ac77");
-  const brass = new MeshStandardMaterial({ color: "#e6b981", metalness: 0.38, roughness: 0.38 });
+  const wood = texture(128, 512, drawWood);
+  const surfaceGrain = texture(128, 128, drawSurfaceGrain);
+  surfaceGrain.colorSpace = NoColorSpace;
+  const matte = (name: string, color: string, roughness = 0.72) => new MeshStandardMaterial({ name, color, roughness });
+  const base = matte("Plinth", "#232935", 0.45);
+  const ink = matte("Graphite", "#202527", 0.53);
+  const wall = matte("Blue plaster", "#41546c", 0.87);
+  wall.bumpMap = surfaceGrain;
+  wall.bumpScale = 0.018;
+  const frame = matte("Blackened frame", "#212a32", 0.34);
+  frame.metalness = 0.46;
+  const oak = matte("Oiled walnut", "#90593a", 0.43);
+  const walnut = matte("Dark walnut", "#71432f", 0.47);
+  oak.map = walnut.map = wood;
+  const paper = matte("Paper and porcelain", "#e5d1b2");
+  const clay = matte("Terracotta", "#944d42", 0.61);
+  const ceramic = matte("Glazed stoneware", "#2b5659", 0.28);
+  const seat = matte("Petrol upholstery", "#277479", 0.90);
+  seat.bumpMap = surfaceGrain;
+  seat.bumpScale = 0.013;
+  const teal = matte("Cloth-bound books", "#496962");
+  const green = matte("Forest leaves", "#406348", 0.62);
+  const sage = matte("Young leaves", "#6d8554", 0.58);
+  const linen = matte("Linen shade", "#d9bd94", 0.69);
+  const coffee = matte("Coffee", "#372116", 0.23);
+  const brass = new MeshStandardMaterial({ name: "Brushed brass", color: "#c89957", metalness: 0.78, roughness: 0.35 });
   const warmLight = new MeshStandardMaterial({
-    color: "#ffd2a0",
-    emissive: "#ffae59",
-    emissiveIntensity: 1.5,
+    name: "Lamp emitter",
+    color: "#ffe0b7",
+    emissive: "#ffbe75",
+    emissiveIntensity: 1.4,
     roughness: 0.36,
   });
 
@@ -188,33 +266,37 @@ function buildWorkshop() {
     return place(new RoundedBoxGeometry(w, h, d, 2, radius), material, x, y, z);
   }
 
-  const textures: CanvasTexture[] = [];
-  function graphic(map: CanvasTexture, x: number, y: number, z: number, width: number, height: number) {
+  const textures = [wood, surfaceGrain];
+  function graphic(name: string, map: CanvasTexture, x: number, y: number, z: number, width: number, height: number) {
     textures.push(map);
-    return place(new PlaneGeometry(width, height), new MeshBasicMaterial({ map, toneMapped: false }), x, y, z);
+    return place(new PlaneGeometry(width, height), new MeshBasicMaterial({ name, map, toneMapped: false }), x, y, z);
   }
 
   rounded(ink, 0, 0.08, 0, 5.46, 0.16, 3.90, 0.075);
   rounded(base, 0, 0.21, 0, 5.56, 0.20, 4.00, 0.085);
   block(brass, 0, 0.246, 2.004, 5.16, 0.018, 0.018);
-  const woods = ["#b19377", "#bfa188", "#c7a78a", "#ac8e70"].map((color) => matte(color, 0.8));
+  const woods = ["#af8a68", "#b19778", "#af8d70", "#9d795c"].map((color, index) => {
+    const plank = matte(`Oak plank ${index + 1}`, color, 0.55);
+    plank.map = wood;
+    return plank;
+  });
   for (let plank = 0; plank < 15; plank += 1) {
     const grain = woods[(plank * 3 + Math.floor(plank / 3)) % woods.length];
     block(grain, -2.59 + plank * 0.37, 0.303, 0, 0.363, 0.058, 3.81);
   }
 
   const back = -1.70;
-  block(wall, -1.54, 1.62, back, 1.69, 2.57, 0.18);
-  block(wall, 2.17, 1.62, back, 0.44, 2.57, 0.18);
+  block(wall, -1.59, 1.62, back, 1.68, 2.57, 0.18);
+  block(wall, 2.09, 1.62, back, 0.60, 2.57, 0.18);
   block(wall, 0.52, 0.88, back, 2.54, 1.10, 0.18);
   block(wall, 0.52, 2.74, back, 2.54, 0.33, 0.18);
-  block(wall, -2.33, 1.62, -0.50, 0.17, 2.57, 2.58);
-  block(frame, -2.33, 2.92, -0.50, 0.23, 0.075, 2.64);
+  block(wall, -2.33, 1.62, -0.41, 0.17, 2.57, 2.40);
+  block(frame, -2.33, 2.92, -0.38, 0.23, 0.075, 2.40);
   block(frame, 0, 2.92, back, 4.90, 0.075, 0.24);
   block(frame, 0, 0.39, back + 0.105, 4.67, 0.105, 0.065);
   block(frame, -2.23, 0.39, -0.51, 0.063, 0.105, 2.42);
 
-  graphic(texture(512, 256, drawWindow), 0.52, 2.01, back, 2.54, 1.22);
+  graphic("Dusk skyline", texture(512, 256, drawWindow), 0.52, 2.01, back, 2.54, 1.22);
   for (const x of [-0.78, 0.08, 0.95, 1.82]) {
     block(frame, x, 2.0, back + 0.055, 0.07, 1.23, 0.16);
   }
@@ -235,8 +317,9 @@ function buildWorkshop() {
     const surface = [0.508, 1.038, 1.558][shelf];
     for (let book = 0; book < 7; book += 1) {
       const height = 0.22 + ((book * 7 + shelf * 2) % 10) * 0.012;
-      block(covers[(book + shelf * 2) % covers.length], -1.96, surface + height / 2, -1.07 + book * 0.155,
-        0.315, height, 0.122, book === 6 ? -0.14 : 0);
+      const z = -1.07 + book * 0.155;
+      block(covers[(book + shelf * 2) % covers.length], -1.96, surface + height / 2, z, 0.315, height, 0.122);
+      if (book % 3 !== 2) block(brass, -1.801, surface + height * 0.77, z, 0.006, 0.009, 0.073);
     }
   }
   block(teal, -1.99, 2.14, -0.95, 0.34, 0.15, 0.46);
@@ -248,25 +331,43 @@ function buildWorkshop() {
     block(ink, x, 0.50, -0.91, 0.076, 0.075, 0.78);
   }
   rounded(frame, 0.56, 1.40, -1.11, 1.455, 0.866, 0.087, 0.041);
-  graphic(texture(512, 288, drawMonitor), 0.56, 1.412, -1.063, 1.366, 0.77);
+  graphic("Code editor", texture(512, 288, drawMonitor), 0.56, 1.412, -1.063, 1.366, 0.77);
   block(frame, 0.56, 1.04, -1.09, 0.16, 0.21, 0.078);
   rounded(frame, 0.56, 1.038, -1.02, 0.56, 0.04, 0.30, 0.018);
-  rounded(paper, 0.53, 1.037, -0.58, 0.66, 0.035, 0.24, 0.015);
+  rounded(frame, 0.53, 1.037, -0.58, 0.66, 0.036, 0.25, 0.015);
+  for (let row = 0; row < 4; row += 1) {
+    for (let column = 0; column < 12; column += 1) {
+      if (row === 3 && column >= 4 && column <= 7) continue;
+      block(paper, 0.236 + column * 0.0535, 1.059, -0.668 + row * 0.056, 0.042, 0.014, 0.041);
+    }
+  }
+  block(paper, 0.53, 1.059, -0.50, 0.205, 0.014, 0.041);
   rounded(frame, 1.02, 1.044, -0.59, 0.14, 0.043, 0.19, 0.02);
-  const sketch = graphic(texture(256, 192, drawSketch), -0.61, 1.032, -0.69, 0.66, 0.48);
+  const sketch = graphic("Interface sketch", texture(256, 192, drawSketch), -0.61, 1.032, -0.69, 0.66, 0.48);
   sketch.rotation.set(-Math.PI / 2, 0, -0.15);
-  block(paper, -0.81, 1.047, -0.51, 0.27, 0.02, 0.018);
+  block(brass, -0.81, 1.047, -0.51, 0.27, 0.015, 0.015);
 
   place(new CylinderGeometry(0.155, 0.155, 0.038, 16), brass, 1.66, 1.048, -1.12);
   place(new CylinderGeometry(0.029, 0.029, 0.46, 12), brass, 1.66, 1.28, -1.12);
-  place(new CylinderGeometry(0.101, 0.223, 0.20, 20), brass, 1.66, 1.56, -1.12);
+  place(new CylinderGeometry(0.101, 0.223, 0.20, 32), linen, 1.66, 1.56, -1.12);
   place(new CylinderGeometry(0.197, 0.197, 0.015, 20), warmLight, 1.66, 1.45, -1.12);
-  place(new CylinderGeometry(0.087, 0.082, 0.15, 16), clay, 1.38, 1.10, -0.56);
-  place(new CylinderGeometry(0.069, 0.069, 0.01, 16), walnut, 1.38, 1.178, -0.56);
+  const cup = new LatheGeometry([
+    [0, 0], [0.066, 0], [0.080, 0.018], [0.091, 0.12], [0.087, 0.15],
+    [0.075, 0.15], [0.076, 0.116], [0.063, 0.026], [0, 0.026],
+  ].map(([radius, height]) => new Vector2(radius, height)), 22);
+  place(cup, ceramic, 1.38, 1.027, -0.56);
+  place(new TorusGeometry(0.053, 0.012, 7, 16), ceramic, 1.466, 1.098, -0.56);
+  place(new CylinderGeometry(0.072, 0.072, 0.006, 20), coffee, 1.38, 1.136, -0.56);
 
   rounded(seat, 0.62, 0.68, 0.03, 0.66, 0.11, 0.58, 0.051);
   const chairBack = rounded(seat, 0.62, 0.955, 0.303, 0.64, 0.43, 0.12, 0.058);
   chairBack.rotation.x = -0.14;
+  const backShell = rounded(frame, 0.62, 0.948, 0.348, 0.60, 0.365, 0.04, 0.019);
+  backShell.rotation.x = -0.14;
+  for (const x of [0.265, 0.975]) {
+    block(ink, x, 0.75, 0.075, 0.038, 0.165, 0.045);
+    rounded(frame, x, 0.837, 0.045, 0.08, 0.043, 0.25, 0.02);
+  }
   block(ink, 0.62, 0.78, 0.32, 0.085, 0.28, 0.063);
   place(new CylinderGeometry(0.042, 0.047, 0.29, 12), ink, 0.62, 0.49, 0.03);
   block(ink, 0.62, 0.36, 0.03, 0.62, 0.055, 0.081);
@@ -309,7 +410,7 @@ function buildWorkshop() {
 export function createHeroScene(canvas: HTMLCanvasElement, context: WebGL2RenderingContext) {
   const renderer = new WebGLRenderer({ canvas, context, alpha: true });
   renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.21;
+  renderer.toneMappingExposure = 0.83;
   const scene = new Scene();
   const camera = new OrthographicCamera(-3.45, 3.45, 3.45, -3.45, 0.1, 30);
 
@@ -317,15 +418,15 @@ export function createHeroScene(canvas: HTMLCanvasElement, context: WebGL2Render
   const pmrem = new PMREMGenerator(renderer);
   const environment = pmrem.fromScene(room, 0.05, 0.1, 100, { size: 64 });
   scene.environment = environment.texture;
-  scene.environmentIntensity = 0.70;
+  scene.environmentIntensity = 0.52;
   room.dispose();
   pmrem.dispose();
 
-  const key = new DirectionalLight("#ffd8ac", 2.85);
+  const key = new DirectionalLight("#ffdeb9", 1.75);
   key.position.set(2.0, 6.1, 4);
-  const rim = new DirectionalLight("#adc9ff", 1.45);
+  const rim = new DirectionalLight("#a5c8fa", 1.46);
   rim.position.set(-3, 5, -3);
-  const lamp = new PointLight("#ffae58", 1.6, 1.8, 2);
+  const lamp = new PointLight("#ffb06b", 2.16, 1.8, 2);
   lamp.position.set(1.66, 1.36, -1.11);
   scene.add(key, rim, lamp);
 
