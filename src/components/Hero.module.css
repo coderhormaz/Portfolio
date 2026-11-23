@@ -8,7 +8,8 @@
   overflow: clip;
   color: var(--warm-white);
   background:
-    radial-gradient(ellipse at 87% 24%, #1b2434 0%, transparent 55%),
+    radial-gradient(ellipse at 82% 21%, #202b45 0%, transparent 54%),
+    radial-gradient(ellipse at 96% 84%, #2a1b19 0%, transparent 46%),
     linear-gradient(180deg, #121115 0%, #0a0a0c 100%);
 }
 
@@ -167,7 +168,7 @@
   border-radius: 0.75rem;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 52% 45%, #354456, #222b3a 53%, #111621 100%);
+    radial-gradient(ellipse at 29% 40%, #213251, #181b2a 52%, #211917 100%);
 }
 
 .poster,

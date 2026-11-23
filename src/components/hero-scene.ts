@@ -16,7 +16,6 @@ import {
   WebGLRenderer,
 } from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 function disposeModel(model: Object3D) {
@@ -47,12 +46,11 @@ export async function createHeroScene(
   context: WebGL2RenderingContext,
   signal: AbortSignal,
 ) {
-  const response = await fetch("/hero-studio.glb", { signal });
+  const response = await fetch("/hero-studio-night.glb", { signal });
   if (!response.ok) throw new Error("Could not load the studio model");
   const bytes = await response.arrayBuffer();
   signal.throwIfAborted();
-  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-  const { scene: model, cameras } = await loader.parseAsync(bytes, "");
+  const { scene: model, cameras } = await new GLTFLoader().parseAsync(bytes, "");
   const authoredCamera = cameras.find((camera): camera is PerspectiveCamera => camera instanceof PerspectiveCamera);
   if (signal.aborted || !authoredCamera) {
     disposeModel(model);
@@ -62,31 +60,33 @@ export async function createHeroScene(
 
   const renderer = new WebGLRenderer({ canvas, context });
   renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.84;
+  renderer.toneMappingExposure = 0.93;
   const scene = new Scene();
-  scene.background = new Color("#24292e");
+  scene.background = new Color("#101420");
   scene.add(model);
 
   const room = new RoomEnvironment();
   const pmrem = new PMREMGenerator(renderer);
   const environment = pmrem.fromScene(room, 0.06, 0.1, 100, { size: 64 });
   scene.environment = environment.texture;
-  scene.environmentIntensity = 0.42;
+  scene.environmentIntensity = 0.20;
   room.dispose();
   pmrem.dispose();
 
-  const key = new DirectionalLight("#ffe9da", 1.58);
-  key.position.set(-0.45, 2.42, 1.85);
-  const windowLight = new DirectionalLight("#a6c9ff", 1.16);
+  const windowLight = new DirectionalLight("#86a9f5", 0.55);
   windowLight.position.set(-1.46, 1.78, -0.76);
-  const lamp = new PointLight("#ffc17d", 1.4, 0.9, 2);
-  lamp.position.set(0.748, 1.19, -0.66);
-  scene.add(key, windowLight, lamp, new HemisphereLight("#bbcde4", "#62554f", 0.58));
+  const lamp = new PointLight("#ffb376", 2.45, 1.2, 2);
+  lamp.position.set(0.748, 1.174, -0.676);
+  const blueShelfLight = new PointLight("#647eff", 0.74, 0.95, 2);
+  blueShelfLight.position.set(0.108, 1.854, -0.772);
+  const amberShelfLight = new PointLight("#ff9c60", 0.90, 0.92, 2);
+  amberShelfLight.position.set(1.013, 1.854, -0.772);
+  scene.add(windowLight, lamp, blueShelfLight, amberShelfLight, new HemisphereLight("#9bafdb", "#50403d", 0.40));
 
   model.updateMatrixWorld(true);
   const camera = authoredCamera.clone();
   // Match the framing authored in Blender and keep the view within the room.
-  const target = new Vector3(0.015, 1.18, -0.555);
+  const target = new Vector3(0.025, 1.145, -0.55);
   const orbit = new Spherical().setFromVector3(authoredCamera.getWorldPosition(new Vector3()).sub(target));
   const initialAngle = orbit.theta;
   let pendingFrame = 0;

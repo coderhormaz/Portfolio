@@ -118,12 +118,12 @@ export default function HeroVisual() {
     <figure className={styles.stage} data-model-view={view}>
       <div className={styles.artwork}>
         <picture>
-          <source media="(max-width: 29rem)" srcSet="/hero-studio-480.webp" />
+          <source media="(max-width: 29rem)" srcSet="/hero-studio-night-768.png" />
           <Image
-            src="/hero-studio.webp"
-            alt="A walnut workstation with a glowing monitor and a brass desk lamp beside a city window at dusk"
-            width={960}
-            height={857}
+            src="/hero-studio-night.png"
+            alt="A nighttime coding desk with two displays, an audio controller, and headphones under blue and amber lighting"
+            width={1280}
+            height={1143}
             unoptimized
             fetchPriority="high"
             loading="eager"
