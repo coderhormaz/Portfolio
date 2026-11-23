@@ -164,7 +164,8 @@
   aspect-ratio: 1.07;
   justify-self: center;
   border: 1px solid var(--rule);
-  border-radius: 0.55rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
   background:
     radial-gradient(ellipse at 52% 45%, #354456, #222b3a 53%, #111621 100%);
 }
@@ -179,19 +180,11 @@
 
 .artwork {
   position: absolute;
-  inset: 0 0 2.15rem;
-  container-type: size;
+  inset: 0;
 }
 
 .poster {
-  inset: 50% auto auto 50%;
-  width: min(100cqw, 100cqh);
-  height: auto;
-  transform: translate(-50%, -50%);
-  mask-image:
-    linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent),
-    linear-gradient(transparent, #000 6%, #000 94%, transparent);
-  mask-composite: intersect;
+  object-fit: cover;
 }
 
 .canvas {
@@ -203,6 +196,10 @@
 
 .canvas:active {
   cursor: grabbing;
+}
+
+.canvas:focus-visible {
+  outline-offset: -4px;
 }
 
 .stage[data-model-view="ready"] .poster {
@@ -220,7 +217,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: var(--muted);
+  color: var(--warm-white);
+  text-shadow: 0 1px 4px #07080a;
   font: 400 0.68rem/1.4 var(--font-mono);
 }
 
@@ -231,7 +229,7 @@
   padding-inline: 0.75rem;
   border: 1px solid var(--rule);
   border-radius: 0.25rem;
-  background: #1a1210;
+  background: #141517e8;
   color: var(--warm-white);
   font: 400 0.68rem/1 var(--font-mono);
 }

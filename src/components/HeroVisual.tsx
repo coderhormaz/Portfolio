@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import styles from "./Hero.module.css";
 
-type HeroScene = ReturnType<typeof import("./hero-scene").createHeroScene>;
+type HeroScene = Awaited<ReturnType<typeof import("./hero-scene").createHeroScene>>;
 type ModelView = "still" | "loading" | "ready" | "unavailable";
 
 const rotationKeys: Partial<Record<string, [number, number]>> = {
@@ -27,7 +27,7 @@ export default function HeroVisual() {
     if (!inspecting) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    let stopped = false;
+    const request = new AbortController();
 
     function unavailable() {
       if (document.activeElement === canvas) buttonRef.current?.focus();
@@ -37,7 +37,7 @@ export default function HeroVisual() {
     async function openModel(target: HTMLCanvasElement) {
       try {
         const { createHeroScene } = await import("./hero-scene");
-        if (stopped) return;
+        if (request.signal.aborted) return;
         const context = target.getContext("webgl2", {
           alpha: true,
           antialias: true,
@@ -47,10 +47,15 @@ export default function HeroVisual() {
           unavailable();
           return;
         }
-        sceneRef.current = createHeroScene(target, context);
+        const scene = await createHeroScene(target, context, request.signal);
+        if (request.signal.aborted) {
+          scene.dispose();
+          return;
+        }
+        sceneRef.current = scene;
         setView("ready");
       } catch {
-        if (!stopped) unavailable();
+        if (!request.signal.aborted) unavailable();
       }
     }
 
@@ -58,7 +63,7 @@ export default function HeroVisual() {
     void openModel(canvas);
 
     return () => {
-      stopped = true;
+      request.abort();
       drag.current = null;
       canvas.removeEventListener("webglcontextlost", unavailable);
       sceneRef.current?.dispose();
@@ -103,7 +108,7 @@ export default function HeroVisual() {
   }
 
   const controlLabel = {
-    still: "Rotate model",
+    still: "Explore in 3D",
     loading: "Cancel loading",
     ready: "Close 3D view",
     unavailable: "3D unavailable",
@@ -113,12 +118,12 @@ export default function HeroVisual() {
     <figure className={styles.stage} data-model-view={view}>
       <div className={styles.artwork}>
         <picture>
-          <source media="(max-width: 29rem)" srcSet="/hero-workshop-480.webp" />
+          <source media="(max-width: 29rem)" srcSet="/hero-studio-480.webp" />
           <Image
-            src="/hero-workshop.webp"
-            alt="Miniature software workshop at dusk, with a glowing monitor and a sketch desk framed by curly braces"
-            width={880}
-            height={880}
+            src="/hero-studio.webp"
+            alt="A walnut workstation with a glowing monitor and a brass desk lamp beside a city window at dusk"
+            width={960}
+            height={857}
             unoptimized
             fetchPriority="high"
             loading="eager"
