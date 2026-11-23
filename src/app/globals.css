@@ -178,7 +178,10 @@ code, pre { overflow-wrap: break-word; }
 .scroll-row::-webkit-scrollbar { display: none; }
 
 @media (pointer: fine) {
-  .cursor-none-fine, .cursor-none-fine * { cursor: none !important; }
+  /* Native modal dialogs render above the custom cursor in the browser's top layer. */
+  .cursor-none-fine:not(:has(dialog:modal)),
+  .cursor-none-fine:not(:has(dialog:modal)) * { cursor: none !important; }
+  :root:has(dialog:modal) [data-custom-cursor] { display: none; }
 }
 
 /* touch targets */

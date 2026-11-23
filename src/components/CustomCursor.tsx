@@ -14,7 +14,7 @@ export default function CustomCursor() {
   const sy = useSpring(y, { stiffness: 400, damping: 35, mass: 0.7 });
 
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (!window.matchMedia("(pointer: fine)").matches || !CSS.supports("selector(:has(dialog:modal))")) return;
     let armed = false;
     const move = (e: MouseEvent) => {
       if (!armed) {
@@ -45,6 +45,7 @@ export default function CustomCursor() {
   return (
     <motion.div
       aria-hidden="true"
+      data-custom-cursor
       className="pointer-events-none fixed left-0 top-0 z-[250] rounded-full bg-white mix-blend-difference"
       style={{ x: sx, y: sy, translateX: "-50%", translateY: "-50%" }}
       animate={{
