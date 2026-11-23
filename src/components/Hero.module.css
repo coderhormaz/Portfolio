@@ -8,8 +8,8 @@
   overflow: clip;
   color: var(--warm-white);
   background:
-    radial-gradient(ellipse at 85% 20%, #28180f 0%, transparent 57%),
-    linear-gradient(180deg, #130e0d 0%, #0a0a0c 100%);
+    radial-gradient(ellipse at 87% 24%, #1b2434 0%, transparent 55%),
+    linear-gradient(180deg, #121115 0%, #0a0a0c 100%);
 }
 
 .inner {
@@ -166,7 +166,7 @@
   border: 1px solid var(--rule);
   border-radius: 0.55rem;
   background:
-    radial-gradient(ellipse at 48% 49%, #3d302a, #241b19 56%, #171214 100%);
+    radial-gradient(ellipse at 52% 45%, #354456, #222b3a 53%, #111621 100%);
 }
 
 .poster,

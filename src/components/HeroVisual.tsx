@@ -113,10 +113,10 @@ export default function HeroVisual() {
     <figure className={styles.stage} data-model-view={view}>
       <div className={styles.artwork}>
         <picture>
-          <source media="(max-width: 29rem)" srcSet="/hero-enter-480.webp" />
+          <source media="(max-width: 29rem)" srcSet="/hero-workshop-480.webp" />
           <Image
-            src="/hero-enter.webp"
-            alt="A copper Enter key on a machined base with a circuit board and exposed fasteners"
+            src="/hero-workshop.webp"
+            alt="Miniature software workshop at dusk, with a glowing monitor and a sketch desk framed by curly braces"
             width={880}
             height={880}
             unoptimized
@@ -130,7 +130,7 @@ export default function HeroVisual() {
             ref={canvasRef}
             className={styles.canvas}
             tabIndex={view === "ready" ? 0 : -1}
-            aria-label="3D model of the Enter key"
+            aria-label="3D model of the software workshop"
             aria-describedby="hero-model-help"
             onPointerDown={startDrag}
             onPointerMove={dragModel}

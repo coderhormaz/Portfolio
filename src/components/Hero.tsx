@@ -50,13 +50,13 @@ export default function Hero() {
             </div>
 
             <h1 id="hero-title" className={styles.title}>
-              <span>I build</span>{" "}
-              <em>the whole thing.</em>
+              <span>I turn ideas</span>{" "}
+              <em>into software.</em>
             </h1>
 
             <p className={styles.description}>
-              I&apos;m Hormaz. I build web, Web3, and mobile products, from the screen you
-              use to the systems that run it.
+              I build web, mobile, and Web3 products, from the interface to the
+              infrastructure that runs them.
             </p>
 
             <div className={styles.actions}>

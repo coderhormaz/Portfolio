@@ -1,315 +1,374 @@
 import {
   ACESFilmicToneMapping,
-  BufferGeometry,
+  BoxGeometry,
+  CatmullRomCurve3,
   CanvasTexture,
   CylinderGeometry,
   DirectionalLight,
-  Float32BufferAttribute,
   Group,
   InstancedMesh,
   MathUtils,
   Mesh,
   MeshBasicMaterial,
-  MeshPhysicalMaterial,
   MeshStandardMaterial,
-  NoColorSpace,
   Object3D,
   OrthographicCamera,
   PlaneGeometry,
   PMREMGenerator,
-  RepeatWrapping,
+  PointLight,
   Scene,
+  SphereGeometry,
   SRGBColorSpace,
+  TubeGeometry,
+  Vector3,
   WebGLRenderer,
+  type BufferGeometry,
+  type Material,
+  type Matrix4,
 } from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
-function createKeycap() {
-  const sections = [
-    [0.56, 3.39, 2.48, 0.31],
-    [0.59, 3.49, 2.58, 0.34],
-    [0.65, 3.53, 2.62, 0.36],
-    [0.73, 3.50, 2.60, 0.36],
-    [1.26, 3.18, 2.28, 0.31],
-    [1.37, 3.07, 2.18, 0.30],
-    [1.43, 2.97, 2.08, 0.27],
-    [1.46, 2.87, 1.98, 0.24],
-    [1.45, 2.75, 1.86, 0.23],
-    [1.425, 2.59, 1.71, 0.21],
-  ];
-  const pointsPerCorner = 9;
-  const pointsPerRing = 4 * pointsPerCorner;
-  const positions: number[] = [];
-  const faces: number[] = [];
-
-  sections.forEach(([y, width, depth, radius], ring) => {
-    for (let corner = 0; corner < 4; corner += 1) {
-      const middle = Math.PI * (0.5 * corner + 0.25);
-      const centerX = Math.sign(Math.cos(middle)) * (width / 2 - radius);
-      const centerZ = Math.sign(Math.sin(middle)) * (depth / 2 - radius);
-      for (let point = 0; point < pointsPerCorner; point += 1) {
-        const angle = Math.PI * (corner + point / (pointsPerCorner - 1)) / 2;
-        positions.push(centerX + Math.cos(angle) * radius, y, centerZ + Math.sin(angle) * radius);
-      }
-    }
-
-    if (ring === 0) return;
-    for (let point = 0; point < pointsPerRing; point += 1) {
-      const lower = (ring - 1) * pointsPerRing + point;
-      const next = (ring - 1) * pointsPerRing + (point + 1) % pointsPerRing;
-      faces.push(lower, lower + pointsPerRing, next, next, lower + pointsPerRing, next + pointsPerRing);
-    }
-  });
-
-  const top = (sections.length - 1) * pointsPerRing;
-  const topCenter = sections.length * pointsPerRing;
-  const bottomCenter = topCenter + 1;
-  positions.push(0, 1.425, 0, 0, 0.56, 0);
-  for (let point = 0; point < pointsPerRing; point += 1) {
-    const next = (point + 1) % pointsPerRing;
-    faces.push(topCenter, top + next, top + point, bottomCenter, point, next);
-  }
-
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
-  const uv = [];
-  for (let index = 0; index < positions.length; index += 3) {
-    uv.push(positions[index] / 3.54 + 0.5, positions[index + 2] / 2.64 + 0.5);
-  }
-  geometry.setAttribute("uv", new Float32BufferAttribute(uv, 2));
-  geometry.setIndex(faces);
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
-function makeTexture(width: number, height: number, draw: (ctx: CanvasRenderingContext2D) => void) {
+function texture(width: number, height: number, draw: (ctx: CanvasRenderingContext2D) => void) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not draw the model details");
+  if (!ctx) throw new Error("Could not draw the workshop details");
   draw(ctx);
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
+  const map = new CanvasTexture(canvas);
+  map.colorSpace = SRGBColorSpace;
+  return map;
 }
 
-function drawLegend(ctx: CanvasRenderingContext2D) {
-  ctx.fillStyle = "#fff0d7";
-  ctx.font = '600 125px "Segoe UI", sans-serif';
-  ctx.fillText("enter", 48, 185);
-  ctx.strokeStyle = "#fff0d7";
-  ctx.lineWidth = 17;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
+function drawWindow(ctx: CanvasRenderingContext2D) {
+  const sky = ctx.createLinearGradient(0, 0, 0, 256);
+  sky.addColorStop(0, "#26335b");
+  sky.addColorStop(0.64, "#526d91");
+  sky.addColorStop(1, "#ce998c");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, 512, 256);
+
+  ctx.fillStyle = "#ffedce";
   ctx.beginPath();
-  ctx.moveTo(704, 95);
-  ctx.lineTo(704, 205);
-  ctx.lineTo(541, 205);
-  ctx.moveTo(581, 162);
-  ctx.lineTo(541, 205);
-  ctx.lineTo(581, 246);
+  ctx.arc(407, 56, 15, 0, Math.PI * 2);
+  ctx.fill();
+  for (let star = 0; star < 32; star += 1) {
+    ctx.fillStyle = star % 4 === 0 ? "#ffe8c9" : "#d5dfed68";
+    ctx.fillRect((star * 143 + 19) % 503, (star * 61 + 13) % 126, 2, 2);
+  }
+
+  for (let tower = 0; tower < 22; tower += 1) {
+    const x = tower * 24;
+    const height = 20 + (tower * 19) % 66;
+    const y = 256 - height;
+    ctx.fillStyle = tower % 3 === 0 ? "#2c3853" : "#394665";
+    ctx.fillRect(x, y, 21, height);
+    ctx.fillStyle = "#f6bb80ad";
+    for (let floor = 0; floor < (height - 9) / 10; floor += 1) {
+      const offset = (tower + floor) % 2 ? 5 : 12;
+      ctx.fillRect(x + offset, y + 8 + floor * 10, 3, 3);
+    }
+  }
+}
+
+function drawMonitor(ctx: CanvasRenderingContext2D) {
+  ctx.fillStyle = "#12232e";
+  ctx.fillRect(0, 0, 512, 288);
+  ctx.fillStyle = "#223946";
+  ctx.fillRect(0, 0, 512, 31);
+  ctx.fillRect(0, 31, 42, 257);
+
+  ["#fb8f83", "#edbf80", "#8cdaba"].forEach((color, index) => {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(18 + index * 18, 16, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  const lines = [
+    ["#dcafef", "export function build() {"],
+    ["#92eacb", "  const idea = sketch();"],
+    ["#a4c9f6", "  return make(idea);"],
+    ["#dcafef", "}"],
+  ];
+  ctx.font = '20px "Consolas", monospace';
+  lines.forEach(([color, text], index) => {
+    ctx.fillStyle = "#7895a5";
+    ctx.fillText(String(index + 1), 14, 68 + index * 31);
+    ctx.fillStyle = color;
+    ctx.fillText(text, 60, 68 + index * 31);
+  });
+  ctx.fillStyle = "#0c1a23";
+  ctx.fillRect(42, 209, 470, 79);
+  ctx.fillStyle = "#aee9c3";
+  ctx.fillText("> npm run build", 62, 247);
+}
+
+function drawSketch(ctx: CanvasRenderingContext2D) {
+  ctx.fillStyle = "#5e84a6";
+  ctx.fillRect(0, 0, 256, 192);
+  ctx.strokeStyle = "#aec7dc76";
+  ctx.lineWidth = 1;
+  for (let step = 16; step < 256; step += 16) {
+    ctx.beginPath();
+    ctx.moveTo(step, 0);
+    ctx.lineTo(step, 192);
+    ctx.moveTo(0, step);
+    ctx.lineTo(256, step);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = "#eaf4f3";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(25, 31, 200, 124);
+  ctx.strokeRect(39, 54, 65, 86);
+  ctx.strokeRect(119, 54, 91, 33);
+  ctx.strokeRect(119, 100, 91, 40);
+  ctx.beginPath();
+  ctx.moveTo(40, 59);
+  ctx.lineTo(104, 139);
+  ctx.moveTo(104, 59);
+  ctx.lineTo(40, 139);
   ctx.stroke();
 }
 
 function drawShadow(ctx: CanvasRenderingContext2D) {
-  const shadow = ctx.createRadialGradient(128, 128, 27, 128, 128, 127);
-  shadow.addColorStop(0, "rgba(0,0,0,0.95)");
-  shadow.addColorStop(0.46, "rgba(0,0,0,0.68)");
-  shadow.addColorStop(0.74, "rgba(0,0,0,0.27)");
-  shadow.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = shadow;
+  const shade = ctx.createRadialGradient(128, 128, 27, 128, 128, 127);
+  shade.addColorStop(0, "rgba(0,0,0,0.84)");
+  shade.addColorStop(0.53, "rgba(0,0,0,0.56)");
+  shade.addColorStop(0.79, "rgba(0,0,0,0.2)");
+  shade.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = shade;
   ctx.fillRect(0, 0, 256, 256);
 }
 
-function drawGrain(ctx: CanvasRenderingContext2D) {
-  const image = ctx.createImageData(128, 128);
-  let seed = 7249;
-  for (let pixel = 0; pixel < 128 * 128; pixel += 1) {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    const row = Math.floor(pixel / 128);
-    const value = 110 + 15 * Math.sin(row * 1.4) + (seed >>> 27);
-    image.data.set([value, value, value, 255], pixel * 4);
-  }
-  ctx.putImageData(image, 0, 0);
-}
-
-function drawTraces(ctx: CanvasRenderingContext2D) {
-  ctx.strokeStyle = "#ce9a626b";
-  ctx.lineWidth = 1.7;
-  for (const side of [-1, 1]) {
-    for (let pin = 0; pin < 14; pin += 1) {
-      const x = 96 + pin * 24.6;
-      const y = 192 + side * 174.8;
-      const bend = y - side * (11 + (pin % 3) * 4);
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x, bend);
-      ctx.lineTo(x + 14, bend - side * 11);
-      ctx.lineTo(x + 14, bend - side * 27);
-      ctx.stroke();
-    }
-  }
-}
-
-function buildEnterKey() {
+function buildWorkshop() {
   const model = new Group();
-  const darkMetal = new MeshStandardMaterial({ color: "#292d31", metalness: 0.78, roughness: 0.33 });
-  const shell = new MeshStandardMaterial({ color: "#404244", metalness: 0.85, roughness: 0.34 });
-  const copper = new MeshStandardMaterial({ color: "#c07146", metalness: 0.84, roughness: 0.33 });
-  const board = new MeshStandardMaterial({ color: "#243331", metalness: 0.38, roughness: 0.48 });
-  const hardware = new MeshStandardMaterial({ color: "#9a8570", metalness: 0.76, roughness: 0.29 });
-  const recess = new MeshStandardMaterial({ color: "#101415", metalness: 0.45, roughness: 0.56 });
-  const amber = new MeshPhysicalMaterial({
-    color: "#513a26",
-    metalness: 0.35,
-    roughness: 0.3,
-    clearcoat: 0.7,
-    clearcoatRoughness: 0.26,
-  });
-  const grain = makeTexture(128, 128, drawGrain);
-  grain.colorSpace = NoColorSpace;
-  grain.wrapS = RepeatWrapping;
-  grain.wrapT = RepeatWrapping;
-  grain.repeat.set(3, 3);
-  const keyFinish = new MeshPhysicalMaterial({
-    color: "#a13e24",
-    metalness: 0.66,
-    roughness: 0.38,
-    clearcoat: 0.32,
-    clearcoatRoughness: 0.31,
-    bumpMap: grain,
-    bumpScale: 0.012,
-  });
-  const light = new MeshStandardMaterial({
-    color: "#ff9253",
-    emissive: "#ff6a31",
-    emissiveIntensity: 2,
-    roughness: 0.33,
+  const blocks = new Map<Material, Matrix4[]>();
+  const transform = new Object3D();
+  const matte = (color: string, roughness = 0.72) => new MeshStandardMaterial({ color, roughness });
+  const base = matte("#283348", 0.49);
+  const ink = matte("#1c2938");
+  const wall = matte("#496079");
+  const frame = matte("#26364d", 0.5);
+  const oak = matte("#b27f57");
+  const walnut = matte("#694738");
+  const paper = matte("#e6d3b7");
+  const clay = matte("#bb6657");
+  const seat = matte("#398a9c", 0.51);
+  const teal = matte("#608b85");
+  const green = matte("#628e70");
+  const sage = matte("#96ac77");
+  const brass = new MeshStandardMaterial({ color: "#e6b981", metalness: 0.38, roughness: 0.38 });
+  const warmLight = new MeshStandardMaterial({
+    color: "#ffd2a0",
+    emissive: "#ffae59",
+    emissiveIntensity: 1.5,
+    roughness: 0.36,
   });
 
-  function slab(width: number, height: number, depth: number, radius: number, material: MeshStandardMaterial, y: number) {
-    const mesh = new Mesh(new RoundedBoxGeometry(width, height, depth, 2, radius), material);
-    mesh.position.y = y;
+  function block(material: Material, x: number, y: number, z: number, width: number, height: number, depth: number, tilt = 0) {
+    transform.position.set(x, y, z);
+    transform.rotation.set(tilt, 0, 0);
+    transform.scale.set(width, height, depth);
+    transform.updateMatrix();
+    const batch = blocks.get(material);
+    if (batch) batch.push(transform.matrix.clone());
+    else blocks.set(material, [transform.matrix.clone()]);
+  }
+
+  function place(geometry: BufferGeometry, material: Material, x: number, y: number, z: number) {
+    const mesh = new Mesh(geometry, material);
+    mesh.position.set(x, y, z);
     model.add(mesh);
     return mesh;
   }
 
-  slab(4.28, 0.22, 3.32, 0.10, darkMetal, 0.11);
-  slab(4.33, 0.34, 3.37, 0.14, shell, 0.28);
-  slab(4.23, 0.065, 3.27, 0.03, copper, 0.432);
-  slab(4.08, 0.072, 3.12, 0.035, board, 0.465);
-  slab(2.61, 0.13, 1.77, 0.05, amber, 0.561);
-  slab(1.95, 0.12, 1.32, 0.055, darkMetal, 0.625);
+  function rounded(material: Material, x: number, y: number, z: number, w: number, h: number, d: number, radius: number) {
+    return place(new RoundedBoxGeometry(w, h, d, 2, radius), material, x, y, z);
+  }
 
-  const traces = makeTexture(512, 384, drawTraces);
-  const circuit = new Mesh(
-    new PlaneGeometry(4.08, 3.12),
-    new MeshBasicMaterial({ map: traces, transparent: true, depthWrite: false, toneMapped: false }),
-  );
-  circuit.rotation.x = -Math.PI / 2;
-  circuit.position.y = 0.503;
-  model.add(circuit);
+  const textures: CanvasTexture[] = [];
+  function graphic(map: CanvasTexture, x: number, y: number, z: number, width: number, height: number) {
+    textures.push(map);
+    return place(new PlaneGeometry(width, height), new MeshBasicMaterial({ map, toneMapped: false }), x, y, z);
+  }
 
-  const foot = new RoundedBoxGeometry(0.76, 0.10, 0.62, 2, 0.045);
-  const screw = new CylinderGeometry(0.118, 0.124, 0.033, 18);
-  const socket = new CylinderGeometry(0.055, 0.055, 0.006, 6);
-  for (const x of [-1.86, 1.86]) {
-    for (const z of [-1.37, 1.37]) {
-      const rubber = new Mesh(foot, recess);
-      rubber.position.set(x * 0.76, -0.042, z * 0.68);
-      const fastener = new Mesh(screw, hardware);
-      fastener.position.set(x, 0.512, z);
-      const inset = new Mesh(socket, recess);
-      inset.position.set(x, 0.53, z);
-      model.add(rubber, fastener, inset);
+  rounded(ink, 0, 0.08, 0, 5.46, 0.16, 3.90, 0.075);
+  rounded(base, 0, 0.21, 0, 5.56, 0.20, 4.00, 0.085);
+  block(brass, 0, 0.246, 2.004, 5.16, 0.018, 0.018);
+  const woods = ["#b19377", "#bfa188", "#c7a78a", "#ac8e70"].map((color) => matte(color, 0.8));
+  for (let plank = 0; plank < 15; plank += 1) {
+    const grain = woods[(plank * 3 + Math.floor(plank / 3)) % woods.length];
+    block(grain, -2.59 + plank * 0.37, 0.303, 0, 0.363, 0.058, 3.81);
+  }
+
+  const back = -1.70;
+  block(wall, -1.54, 1.62, back, 1.69, 2.57, 0.18);
+  block(wall, 2.17, 1.62, back, 0.44, 2.57, 0.18);
+  block(wall, 0.52, 0.88, back, 2.54, 1.10, 0.18);
+  block(wall, 0.52, 2.74, back, 2.54, 0.33, 0.18);
+  block(wall, -2.33, 1.62, -0.50, 0.17, 2.57, 2.58);
+  block(frame, -2.33, 2.92, -0.50, 0.23, 0.075, 2.64);
+  block(frame, 0, 2.92, back, 4.90, 0.075, 0.24);
+  block(frame, 0, 0.39, back + 0.105, 4.67, 0.105, 0.065);
+  block(frame, -2.23, 0.39, -0.51, 0.063, 0.105, 2.42);
+
+  graphic(texture(512, 256, drawWindow), 0.52, 2.01, back, 2.54, 1.22);
+  for (const x of [-0.78, 0.08, 0.95, 1.82]) {
+    block(frame, x, 2.0, back + 0.055, 0.07, 1.23, 0.16);
+  }
+  for (const y of [1.40, 2.02, 2.60]) {
+    block(frame, 0.52, y, back + 0.066, 2.64, 0.067, 0.18);
+  }
+  block(paper, 0.52, 1.37, back + 0.17, 2.66, 0.065, 0.28);
+
+  // Open shelving shares the cutaway wall.
+  for (const z of [-1.22, 0.18]) {
+    block(walnut, -2.00, 1.32, z, 0.43, 1.72, 0.063);
+  }
+  for (const y of [0.47, 1.00, 1.52, 2.04]) {
+    block(oak, -2.00, y, -0.52, 0.46, 0.075, 1.45);
+  }
+  const covers = [teal, clay, paper, ink, brass];
+  for (let shelf = 0; shelf < 3; shelf += 1) {
+    const surface = [0.508, 1.038, 1.558][shelf];
+    for (let book = 0; book < 7; book += 1) {
+      const height = 0.22 + ((book * 7 + shelf * 2) % 10) * 0.012;
+      block(covers[(book + shelf * 2) % covers.length], -1.96, surface + height / 2, -1.07 + book * 0.155,
+        0.315, height, 0.122, book === 6 ? -0.14 : 0);
     }
   }
+  block(teal, -1.99, 2.14, -0.95, 0.34, 0.15, 0.46);
+  block(paper, -1.99, 2.23, -0.95, 0.36, 0.036, 0.48);
 
-  const contacts = new InstancedMesh(new RoundedBoxGeometry(0.11, 0.012, 0.044, 1, 0.006), copper, 28);
-  const transform = new Object3D();
-  for (let pin = 0; pin < 28; pin += 1) {
-    transform.position.set(-1.27 + (pin % 14) * 0.196, 0.507, pin < 14 ? 1.42 : -1.42);
-    transform.updateMatrix();
-    contacts.setMatrixAt(pin, transform.matrix);
+  rounded(oak, 0.47, 0.97, -0.91, 3.19, 0.114, 0.96, 0.054);
+  for (const x of [-0.98, 1.88]) {
+    for (const z of [-1.27, -0.55]) block(ink, x, 0.62, z, 0.09, 0.61, 0.09);
+    block(ink, x, 0.50, -0.91, 0.076, 0.075, 0.78);
   }
-  model.add(contacts);
+  rounded(frame, 0.56, 1.40, -1.11, 1.455, 0.866, 0.087, 0.041);
+  graphic(texture(512, 288, drawMonitor), 0.56, 1.412, -1.063, 1.366, 0.77);
+  block(frame, 0.56, 1.04, -1.09, 0.16, 0.21, 0.078);
+  rounded(frame, 0.56, 1.038, -1.02, 0.56, 0.04, 0.30, 0.018);
+  rounded(paper, 0.53, 1.037, -0.58, 0.66, 0.035, 0.24, 0.015);
+  rounded(frame, 1.02, 1.044, -0.59, 0.14, 0.043, 0.19, 0.02);
+  const sketch = graphic(texture(256, 192, drawSketch), -0.61, 1.032, -0.69, 0.66, 0.48);
+  sketch.rotation.set(-Math.PI / 2, 0, -0.15);
+  block(paper, -0.81, 1.047, -0.51, 0.27, 0.02, 0.018);
 
-  const port = slab(0.56, 0.12, 0.045, 0.020, recess, 0.28);
-  port.position.set(0, 0.28, -1.676);
-  const indicator = slab(0.25, 0.035, 0.020, 0.01, light, 0.27);
-  indicator.position.set(1.43, 0.269, 1.68);
+  place(new CylinderGeometry(0.155, 0.155, 0.038, 16), brass, 1.66, 1.048, -1.12);
+  place(new CylinderGeometry(0.029, 0.029, 0.46, 12), brass, 1.66, 1.28, -1.12);
+  place(new CylinderGeometry(0.101, 0.223, 0.20, 20), brass, 1.66, 1.56, -1.12);
+  place(new CylinderGeometry(0.197, 0.197, 0.015, 20), warmLight, 1.66, 1.45, -1.12);
+  place(new CylinderGeometry(0.087, 0.082, 0.15, 16), clay, 1.38, 1.10, -0.56);
+  place(new CylinderGeometry(0.069, 0.069, 0.01, 16), walnut, 1.38, 1.178, -0.56);
 
-  const cap = new Mesh(createKeycap(), keyFinish);
-  cap.position.y = 0.14;
-  model.add(cap);
-  const legendTexture = makeTexture(768, 288, drawLegend);
-  legendTexture.anisotropy = 4;
-  const legend = new Mesh(
-    new PlaneGeometry(2.35, 0.88),
-    new MeshBasicMaterial({ map: legendTexture, transparent: true, depthWrite: false, toneMapped: false }),
-  );
-  legend.rotation.x = -Math.PI / 2;
-  legend.position.set(0, 1.568, 0.08);
-  model.add(legend);
+  rounded(seat, 0.62, 0.68, 0.03, 0.66, 0.11, 0.58, 0.051);
+  const chairBack = rounded(seat, 0.62, 0.955, 0.303, 0.64, 0.43, 0.12, 0.058);
+  chairBack.rotation.x = -0.14;
+  block(ink, 0.62, 0.78, 0.32, 0.085, 0.28, 0.063);
+  place(new CylinderGeometry(0.042, 0.047, 0.29, 12), ink, 0.62, 0.49, 0.03);
+  block(ink, 0.62, 0.36, 0.03, 0.62, 0.055, 0.081);
+  block(ink, 0.62, 0.36, 0.03, 0.081, 0.055, 0.61);
 
-  return { model, textures: [grain, traces, legendTexture] };
+  place(new CylinderGeometry(0.233, 0.162, 0.38, 24), clay, 1.88, 0.52, 0.93);
+  place(new CylinderGeometry(0.213, 0.213, 0.018, 24), walnut, 1.88, 0.713, 0.93);
+  const leafShape = new SphereGeometry(1, 12, 8);
+  for (let index = 0; index < 9; index += 1) {
+    const angle = index * 2.4;
+    const radius = 0.13 + (index % 3) * 0.07;
+    const leaf = place(leafShape, index % 3 === 0 ? sage : green,
+      1.88 + Math.cos(angle) * radius, 0.78 + ((index * 7) % 5) * 0.082, 0.93 + Math.sin(angle) * radius);
+    leaf.scale.set(0.12, 0.26, 0.045);
+    leaf.rotation.set(Math.cos(angle) * 0.75, angle, Math.sin(angle) * 0.67);
+  }
+
+  const curl = [
+    [0.26, 1.08], [0.06, 1.07], [-0.075, 0.9], [-0.075, 0.42],
+    [-0.13, 0.18], [-0.31, 0], [-0.13, -0.18], [-0.075, -0.42],
+    [-0.075, -0.9], [0.06, -1.07], [0.26, -1.08],
+  ];
+  for (const side of [-1, 1]) {
+    const x = side * 2.37;
+    const profile = new CatmullRomCurve3(curl.map(([offset, y]) => new Vector3(-side * offset, y, 0)));
+    place(new TubeGeometry(profile, 42, 0.056, 8, false), brass, x, 1.48, 1.65);
+    block(brass, x - side * 0.25, 0.371, 1.65, 0.33, 0.068, 0.28);
+  }
+
+  const cube = new BoxGeometry(1, 1, 1);
+  for (const [material, matrices] of blocks) {
+    const batch = new InstancedMesh(cube, material, matrices.length);
+    matrices.forEach((matrix, index) => batch.setMatrixAt(index, matrix));
+    model.add(batch);
+  }
+
+  return { model, textures };
 }
 
 export function createHeroScene(canvas: HTMLCanvasElement, context: WebGL2RenderingContext) {
   const renderer = new WebGLRenderer({ canvas, context, alpha: true });
   renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.21;
   const scene = new Scene();
-  const camera = new OrthographicCamera(-2.7, 2.7, 2.7, -2.7, 0.1, 30);
+  const camera = new OrthographicCamera(-3.45, 3.45, 3.45, -3.45, 0.1, 30);
 
   const room = new RoomEnvironment();
   const pmrem = new PMREMGenerator(renderer);
-  const environment = pmrem.fromScene(room, 0.05, 0.1, 100, { size: 128 });
+  const environment = pmrem.fromScene(room, 0.05, 0.1, 100, { size: 64 });
   scene.environment = environment.texture;
-  scene.environmentIntensity = 0.95;
+  scene.environmentIntensity = 0.70;
   room.dispose();
   pmrem.dispose();
 
-  const keyLight = new DirectionalLight("#fff0da", 2.35);
-  keyLight.position.set(-3, 7, 5);
-  const rim = new DirectionalLight("#ffac70", 2.4);
-  rim.position.set(3, 2, -4);
-  const fill = new DirectionalLight("#aabcca", 0.6);
-  fill.position.set(5, 2, 5);
-  scene.add(keyLight, rim, fill);
+  const key = new DirectionalLight("#ffd8ac", 2.85);
+  key.position.set(2.0, 6.1, 4);
+  const rim = new DirectionalLight("#adc9ff", 1.45);
+  rim.position.set(-3, 5, -3);
+  const lamp = new PointLight("#ffae58", 1.6, 1.8, 2);
+  lamp.position.set(1.66, 1.36, -1.11);
+  scene.add(key, rim, lamp);
 
-  const { model, textures } = buildEnterKey();
+  const { model, textures } = buildWorkshop();
   scene.add(model);
-  const shadowTexture = makeTexture(256, 256, drawShadow);
-  const shadow = new Mesh(
-    new PlaneGeometry(6.6, 5.5),
-    new MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false }),
-  );
-  shadow.rotation.x = -Math.PI / 2;
-  shadow.position.set(-0.12, -0.1, 0.14);
-  scene.add(shadow);
+  const shadowTexture = texture(256, 256, drawShadow);
+  const shadowPlane = new PlaneGeometry(1, 1);
+  shadowPlane.rotateX(-Math.PI / 2);
+  const groundShade = new MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false });
+  const interiorShade = new MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false, opacity: 0.4 });
+  for (const [x, y, z, width, depth] of [
+    [-0.07, -0.025, 0.16, 8.1, 6.5],
+    [0.49, 0.335, -0.90, 3.7, 1.67],
+    [0.62, 0.336, 0.04, 1.13, 1.04],
+    [-2.02, 0.337, -0.52, 0.98, 1.76],
+    [1.88, 0.338, 0.93, 0.80, 0.77],
+  ]) {
+    const contact = new Mesh(shadowPlane, y < 0 ? groundShade : interiorShade);
+    contact.position.set(x, y, z);
+    contact.scale.set(width, 1, depth);
+    scene.add(contact);
+  }
 
-  let azimuth = 0.55;
-  let elevation = 0.56;
+  let azimuth = 0.54;
+  let elevation = 0.53;
   let pendingFrame = 0;
 
   function draw() {
-    const radius = 8;
+    const radius = 10;
+    const targetY = 1.30;
     camera.position.set(
       Math.sin(azimuth) * Math.cos(elevation) * radius,
-      0.59 + Math.sin(elevation) * radius,
+      targetY + Math.sin(elevation) * radius,
       Math.cos(azimuth) * Math.cos(elevation) * radius,
     );
-    camera.lookAt(0, 0.59, 0);
+    camera.lookAt(0, targetY, 0);
     renderer.render(scene, camera);
   }
 
   function resize() {
     const { clientWidth: width, clientHeight: height } = canvas;
     if (!width || !height) return;
-    const extent = 2.98;
+    const extent = 3.65;
     const aspect = width / height;
     const horizontal = extent * Math.max(aspect, 1);
     const vertical = extent * Math.max(1 / aspect, 1);
@@ -343,12 +402,13 @@ export function createHeroScene(canvas: HTMLCanvasElement, context: WebGL2Render
       scene.traverse((object) => {
         if (!(object instanceof Mesh)) return;
         resources.add(object.geometry);
+        if (object instanceof InstancedMesh) resources.add(object);
         for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
           resources.add(material);
         }
       });
       for (const resource of resources) resource.dispose();
-      for (const texture of textures) texture.dispose();
+      for (const map of textures) map.dispose();
       shadowTexture.dispose();
       environment.dispose();
       renderer.dispose();
