@@ -1,11 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Code2, Pause, Play, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Code2, Medal, Pause, Play, X } from "lucide-react";
 import { posterFor, type Project } from "@/data/portfolio";
-import { EASE } from "./ui";
 import ProjectArt from "./ProjectArt";
 
 function Media({ p, i }: { p: Project; i: number }) {
@@ -32,12 +30,13 @@ function Media({ p, i }: { p: Project; i: number }) {
           playsInline
           preload="none"
           aria-label={`${p.title} demo`}
-          className="aspect-video w-full bg-[#08080b] object-contain"
+          className="block aspect-video w-full object-contain"
         />
         <button
+          type="button"
           onClick={() => setPlaying((v) => !v)}
           aria-label={playing ? "Pause demo video" : "Play demo video"}
-          className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur transition hover:border-[#ff4d00] hover:text-[#ff4d00]"
+          className="absolute bottom-2 right-2 grid size-11 place-items-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
         >
           {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </button>
@@ -52,7 +51,8 @@ function Media({ p, i }: { p: Project; i: number }) {
         alt={`${p.title} screenshot`}
         width={1600}
         height={900}
-        className="aspect-video w-full bg-[#08080b] object-contain"
+        sizes="(min-width: 1024px) 30rem, 100vw"
+        className="block aspect-video w-full object-contain"
       />
     );
   }
@@ -71,229 +71,168 @@ export default function CaseStudy({
   onNavigate,
 }: {
   projects: Project[];
-  index: number | null;
+  index: number;
   onClose: () => void;
   onNavigate: (next: number) => void;
 }) {
-  const reduce = useReducedMotion();
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const restoreRef = useRef<HTMLElement | null>(null);
-  const open = index !== null;
-  const p = open ? projects[index] : null;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const p = projects[index];
+  const previousIndex = (index - 1 + projects.length) % projects.length;
+  const nextIndex = (index + 1) % projects.length;
 
-  const step = useCallback(
-    (dir: 1 | -1) => {
-      if (index === null) return;
-      onNavigate((index + dir + projects.length) % projects.length);
-    },
-    [index, projects.length, onNavigate]
-  );
-
-  /* escape to close, arrows to move between builds */
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      else if (e.key === "ArrowRight") step(1);
-      else if (e.key === "ArrowLeft") step(-1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose, step]);
-
-  /* lock the page behind the overlay and move focus in/out for keyboard users */
-  useEffect(() => {
-    if (!open) return;
-    restoreRef.current = document.activeElement as HTMLElement | null;
-    window.dispatchEvent(new CustomEvent("lenis:stop"));
-    const prev = document.body.style.overflow;
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const trigger = document.activeElement;
+    const overflow = document.body.style.overflow;
+    window.dispatchEvent(new Event("lenis:stop"));
     document.body.style.overflow = "hidden";
-    const id = setTimeout(() => closeRef.current?.focus(), 60);
+    dialog.showModal();
     return () => {
-      clearTimeout(id);
-      document.body.style.overflow = prev;
-      window.dispatchEvent(new CustomEvent("lenis:start"));
-      restoreRef.current?.focus?.();
+      dialog.close();
+      document.body.style.overflow = overflow;
+      window.dispatchEvent(new Event("lenis:start"));
+      if (trigger instanceof HTMLElement) trigger.focus({ preventScroll: true });
     };
-  }, [open]);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+  }, [index]);
 
   return (
-    <AnimatePresence>
-      {open && p && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[170] overflow-y-auto overscroll-contain bg-[#06060a]/92 backdrop-blur-xl"
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="case-study-title"
+      data-lenis-prevent
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      onKeyDown={(event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          event.preventDefault();
+          contentRef.current?.focus({ preventScroll: true });
+          onNavigate(event.key === "ArrowLeft" ? previousIndex : nextIndex);
+        }
+      }}
+      className="fixed inset-0 m-auto h-dvh max-h-dvh w-full max-w-none grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-[#111116] p-0 text-bone open:grid backdrop:bg-black/75 backdrop:backdrop-blur-sm sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-5xl sm:rounded-2xl sm:border sm:border-white/15"
+    >
+      <header className="flex items-center justify-between gap-4 border-b border-white/10 bg-[#15151b] px-4 pt-[max(0.375rem,env(safe-area-inset-top))] pb-1.5 sm:px-6">
+        <p className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase leading-snug tracking-wider text-accent-soft sm:text-xs">
+          {p.award === "bounty" && <Medal aria-hidden="true" className="size-4 shrink-0" />}
+          {p.subtitle}
+        </p>
+        <button
+          type="button"
           onClick={onClose}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="case-study-title"
+          aria-label="Close case study"
+          className="grid size-11 shrink-0 place-items-center rounded-full border border-white/15 text-bone transition-colors hover:border-accent hover:text-accent-soft focus-visible:outline-offset-0"
         >
-          {/* min-h-full + no auto margins: centers short content yet always
-              scrolls fully when the panel exceeds the viewport */}
-          <div className="flex min-h-full items-center justify-center p-3 sm:p-6">
-          <motion.div
-            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 40, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }}
-            transition={{ duration: 0.5, ease: [...EASE] }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0f0f13] shadow-[0_40px_140px_rgba(0,0,0,0.8)] sm:rounded-[2rem]"
-          >
-            <button
-              ref={closeRef}
-              onClick={onClose}
-              aria-label="Close case study"
-              className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur transition hover:border-[#ff4d00] hover:text-[#ff4d00] sm:right-4 sm:top-4"
-            >
-              <X className="h-4 w-4" />
-            </button>
+          <X aria-hidden="true" className="size-5" />
+        </button>
+      </header>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={p.title}
-                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduce ? { opacity: 0 } : { opacity: 0, y: -12 }}
-                transition={{ duration: 0.35, ease: [...EASE] }}
-              >
-                {/* media */}
-                <div className="relative border-b border-white/10 bg-[#08080b]">
-                  <Media p={p} i={index} />
-                  {p.award === "bounty" && (
-                    <span className="absolute left-3 top-3 rounded-full bg-[#ff4d00] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-black shadow-lg sm:left-4 sm:top-4">
-                      Bounty win
-                    </span>
+      <div
+        ref={contentRef}
+        role="region"
+        aria-label="Project details"
+        tabIndex={0}
+        className="min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain focus-visible:outline-offset-[-3px]"
+      >
+        <div className="px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+          <div className="grid items-center gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-8">
+            <div>
+              <h2 id="case-study-title" aria-live="polite" className="font-display text-3xl font-bold leading-[1.05] tracking-tight [overflow-wrap:anywhere] sm:text-[clamp(2rem,4vw,3rem)]">
+                {p.title}
+              </h2>
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase leading-relaxed tracking-wider text-bone/65">
+                {p.year && <span>{p.year}</span>}
+                {p.role && <span>{p.role}</span>}
+              </div>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-bone/75 sm:text-base">
+                {p.description}
+              </p>
+              {(p.link || p.repo) && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {p.link && (
+                    <a href={p.link} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-bone px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-accent-soft">
+                      {p.linkLabel ?? "Live demo"}
+                      <ArrowUpRight aria-hidden="true" className="size-4 shrink-0" />
+                    </a>
+                  )}
+                  {p.repo && (
+                    <a href={p.repo} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-bold text-bone transition-colors hover:border-accent hover:text-accent-soft">
+                      <Code2 aria-hidden="true" className="size-4 shrink-0" />
+                      Source code
+                    </a>
                   )}
                 </div>
-
-                {/* body */}
-                <div className="p-5 sm:p-8">
-                  <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] sm:text-[11px]">
-                    <span className="rounded-full bg-[#ff4d00] px-3 py-1 font-bold text-black">
-                      {p.subtitle}
-                    </span>
-                    {p.year && <span className="text-white/40">{p.year}</span>}
-                    {p.role && <span className="text-white/40">· {p.role}</span>}
-                  </div>
-
-                  <h2
-                    id="case-study-title"
-                    className="font-display mt-4 text-3xl font-bold leading-[1.05] tracking-tight text-balance sm:text-5xl"
-                  >
-                    {p.title}
-                  </h2>
-
-                  <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/65 sm:text-base">
-                    {p.description}
-                  </p>
-
-                  {p.metrics && p.metrics.length > 0 && (
-                    <div className="mt-7 grid grid-cols-3 gap-px overflow-hidden rounded-2xl bg-white/10">
-                      {p.metrics.map((m) => (
-                        <div key={m.l} className="bg-[#0f0f13] px-3 py-4 text-center">
-                          <p className="font-display truncate text-base font-bold text-[#ff4d00] sm:text-xl">
-                            {m.v}
-                          </p>
-                          <p className="mt-1 font-mono text-[9px] uppercase leading-tight tracking-[0.15em] text-white/45 sm:text-[10px]">
-                            {m.l}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {p.highlights && p.highlights.length > 0 && (
-                    <div className="mt-7">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
-                        What I built
-                      </p>
-                      <ul className="mt-4 space-y-3">
-                        {p.highlights.map((h) => (
-                          <li key={h.slice(0, 28)} className="flex gap-3 text-[14px] leading-relaxed text-white/70 sm:text-[15px]">
-                            <span className="mt-2 h-1 w-4 shrink-0 rounded-full bg-[#ff4d00]" />
-                            <span className="min-w-0">{h}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="mt-7 flex flex-wrap gap-1.5">
-                    {p.tags.map((t) => (
-                      <span key={t} className="rounded-lg bg-white/[0.06] px-2.5 py-1 text-[11px] text-white/60">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-8 flex flex-wrap gap-2.5">
-                    {p.link && (
-                      <a
-                        href={p.link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group inline-flex items-center gap-2 rounded-full bg-[#ece8de] py-1.5 pl-1.5 pr-5 text-sm font-bold text-black transition hover:bg-[#ff4d00] hover:text-white"
-                      >
-                        <span className="grid h-9 w-9 place-items-center rounded-full bg-black text-white transition group-hover:rotate-45 group-hover:bg-white group-hover:text-black">
-                          <ArrowUpRight className="h-4 w-4" />
-                        </span>
-                        {p.linkLabel ?? "Live demo"}
-                      </a>
-                    )}
-                    {p.repo && (
-                      <a
-                        href={p.repo}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-3.5 text-sm font-bold text-white/80 transition hover:border-[#ff4d00] hover:text-white"
-                      >
-                        <Code2 className="h-4 w-4" />
-                        Source code
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* prev / next */}
-            <div className="flex items-stretch gap-px border-t border-white/10 bg-white/10">
-              <button
-                onClick={() => step(-1)}
-                className="group flex flex-1 items-center gap-3 bg-[#0f0f13] px-4 py-4 text-left transition hover:bg-white/[0.06] sm:px-6"
-              >
-                <ArrowLeft className="h-4 w-4 shrink-0 text-white/40 transition group-hover:-translate-x-0.5 group-hover:text-[#ff4d00]" />
-                <span className="min-w-0">
-                  <span className="block font-mono text-[9px] uppercase tracking-[0.25em] text-white/35">
-                    Previous
-                  </span>
-                  <span className="block truncate text-sm font-semibold">
-                    {projects[(index! - 1 + projects.length) % projects.length].title}
-                  </span>
-                </span>
-              </button>
-              <button
-                onClick={() => step(1)}
-                className="group flex flex-1 items-center justify-end gap-3 bg-[#0f0f13] px-4 py-4 text-right transition hover:bg-white/[0.06] sm:px-6"
-              >
-                <span className="min-w-0">
-                  <span className="block font-mono text-[9px] uppercase tracking-[0.25em] text-white/35">
-                    Next
-                  </span>
-                  <span className="block truncate text-sm font-semibold">
-                    {projects[(index! + 1) % projects.length].title}
-                  </span>
-                </span>
-                <ArrowRight className="h-4 w-4 shrink-0 text-white/40 transition group-hover:translate-x-0.5 group-hover:text-[#ff4d00]" />
-              </button>
+              )}
             </div>
-          </motion.div>
+
+            <div className="overflow-hidden rounded-xl border border-white/10 bg-[#08080b]">
+              <Media key={p.title} p={p} i={index} />
+            </div>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+
+          {!!p.metrics?.length && (
+            <dl className="mt-5 grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-white/[0.03] sm:mt-7">
+              {p.metrics.map((m) => (
+                <div key={m.l} className="flex flex-col px-2.5 py-3 sm:px-4">
+                  <dt className="font-mono text-[10px] leading-snug text-bone/65 sm:text-xs">{m.l}</dt>
+                  <dd className="-order-1 mb-1 font-display text-lg font-bold leading-tight text-accent-soft [overflow-wrap:anywhere] sm:text-xl">{m.v}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          {!!p.highlights?.length && (
+            <section className="mt-6 sm:mt-8">
+              <h3 className="font-display text-lg font-bold">What I built</h3>
+              <ul className="mt-3 list-disc space-y-2 pl-4 text-sm leading-relaxed text-bone/75 marker:text-accent sm:text-[15px]">
+                {p.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
+              </ul>
+            </section>
+          )}
+
+          <ul aria-label="Technologies" className="mt-5 flex flex-wrap gap-1.5 sm:mt-6">
+            {p.tags.map((tag) => (
+              <li key={tag} className="rounded-md bg-white/[0.07] px-2.5 py-1 text-xs text-bone/75">{tag}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <nav aria-label="Browse case studies" className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10 bg-[#15151b] pb-[env(safe-area-inset-bottom)]">
+        <button
+          type="button"
+          onClick={() => onNavigate(previousIndex)}
+          className="flex min-h-13 items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-white/[0.05] focus-visible:outline-offset-[-3px] sm:gap-3 sm:px-6"
+        >
+          <ArrowLeft aria-hidden="true" className="size-4 shrink-0 text-accent-soft" />
+          <span className="min-w-0">
+            <span className="block font-mono text-[10px] uppercase tracking-wider text-bone/65">Previous</span>
+            <span className="block truncate text-xs font-semibold sm:text-sm">{projects[previousIndex].title}</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate(nextIndex)}
+          className="flex min-h-13 items-center justify-end gap-2 px-4 py-2 text-right transition-colors hover:bg-white/[0.05] focus-visible:outline-offset-[-3px] sm:gap-3 sm:px-6"
+        >
+          <span className="min-w-0">
+            <span className="block font-mono text-[10px] uppercase tracking-wider text-bone/65">Next</span>
+            <span className="block truncate text-xs font-semibold sm:text-sm">{projects[nextIndex].title}</span>
+          </span>
+          <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-accent-soft" />
+        </button>
+      </nav>
+    </dialog>
   );
 }

@@ -184,7 +184,10 @@ function BuildCard({
       {/* stretched trigger: the whole card opens the case study */}
       <button
         type="button"
-        onClick={onOpen}
+        onClick={(event) => {
+          event.currentTarget.focus({ preventScroll: true });
+          onOpen();
+        }}
         aria-label={`Open case study: ${p.title}`}
         className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]"
       />
@@ -276,12 +279,14 @@ export default function Projects() {
         </motion.div>
       </div>
 
-      <CaseStudy
-        projects={personalProjects}
-        index={selected}
-        onClose={() => setSelected(null)}
-        onNavigate={setSelected}
-      />
+      {selected !== null && (
+        <CaseStudy
+          projects={personalProjects}
+          index={selected}
+          onClose={() => setSelected(null)}
+          onNavigate={setSelected}
+        />
+      )}
     </section>
   );
 }
